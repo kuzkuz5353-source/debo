@@ -1,0 +1,6 @@
+[Session]
+Name=NEOX
+DesktopName=NEOX
+Compositor=hyprland
+RequiredComponents=neox-shell;neox-panel;neox-desktop-grid
+DefaultProvider-windowmanager=Hyprland

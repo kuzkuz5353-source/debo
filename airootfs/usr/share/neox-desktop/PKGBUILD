@@ -1,0 +1,17 @@
+# Maintainer: NEOX Desktop Contributors
+pkgname=neox-desktop
+pkgver=0.1.0
+pkgrel=1
+pkgdesc='Mobile-inspired Hyprland desktop environment shell'
+arch=('any')
+url='https://example.invalid/neox-desktop'
+license=('GPL3')
+depends=('hyprland' 'python' 'python-gobject' 'gtk4' 'gtk4-layer-shell' 'python-cairo' 'grim' 'slurp' 'wl-clipboard' 'cliphist' 'brightnessctl' 'playerctl' 'networkmanager' 'bluez' 'pipewire' 'wireplumber' 'polkit' 'hyprpaper' 'swayidle' 'jq' 'imagemagick')
+optdepends=('python-dbus-next: notification and shell D-Bus services' 'python-pillow: wallpaper accent extraction' 'python-psutil: system monitor widget' 'wf-recorder: screen recording' 'mpvpaper: live wallpapers' 'swaylock: secure lock screen')
+source=("${pkgname}-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+package() {
+  cd "$srcdir/${pkgname}-${pkgver}"
+  PREFIX=/usr DESTDIR="$pkgdir" bash scripts/install.sh
+}

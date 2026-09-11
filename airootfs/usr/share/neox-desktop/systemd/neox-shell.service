@@ -1,0 +1,16 @@
+[Unit]
+Description=NEOX Shell daemon
+Documentation=file:///usr/share/doc/neox-desktop/README.md
+PartOf=graphical-session.target
+After=graphical-session.target dbus.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/neox-shell
+Restart=on-failure
+RestartSec=2
+Environment=XDG_CURRENT_DESKTOP=NEOX:Hyprland
+Slice=app.slice
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=NEOX
+Comment=Mobile-inspired Wayland desktop built on Hyprland
+Exec=/usr/bin/neox-session
+Type=Application
+DesktopNames=NEOX;Hyprland
+Keywords=Wayland;Hyprland;NEOX;Desktop;

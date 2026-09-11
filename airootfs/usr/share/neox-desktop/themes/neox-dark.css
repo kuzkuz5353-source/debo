@@ -1,0 +1,44 @@
+/* NEOX Dark Theme: default mobile-inspired palette. */
+:root {
+  --neox-bg-primary: #0b1020;
+  --neox-bg-secondary: #111827;
+  --neox-bg-tertiary: #1f2937;
+  --neox-text-primary: #f8fafc;
+  --neox-text-secondary: rgba(248,250,252,0.70);
+  --neox-accent: #3b82f6;
+  --neox-accent-hover: #60a5fa;
+  --neox-border: rgba(255,255,255,0.10);
+  --neox-shadow: rgba(0,0,0,0.42);
+  --neox-blur-amount: 18px;
+  --neox-border-radius: 24px;
+  --neox-animation-duration: 300ms;
+  --neox-font-family: Inter, Cantarell, sans-serif;
+  --neox-font-size: 14px;
+  --neox-icon-size: 72px;
+}
+window, .root, .neox-island, .neox-grid-root {
+  font-family: var(--neox-font-family);
+  font-size: var(--neox-font-size);
+  color: var(--neox-text-primary);
+}
+.neox-surface {
+  background: rgba(17,24,39,0.92);
+  border: 1px solid var(--neox-border);
+  border-radius: var(--neox-border-radius);
+  box-shadow: 0 20px 50px var(--neox-shadow);
+}
+button {
+  border-radius: 16px;
+  background: rgba(255,255,255,0.08);
+  color: var(--neox-text-primary);
+  border: 1px solid rgba(255,255,255,0.06);
+  transition: all var(--neox-animation-duration) cubic-bezier(0.4,0,0.2,1);
+}
+button:hover { background: rgba(96,165,250,0.22); border-color: rgba(96,165,250,0.35); }
+button:active { transform: scale(0.96); }
+entry, searchentry {
+  background: rgba(255,255,255,0.10);
+  color: var(--neox-text-primary);
+  border-radius: 999px;
+  border: 1px solid var(--neox-border);
+}

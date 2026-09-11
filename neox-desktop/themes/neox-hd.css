@@ -1,0 +1,92 @@
+/* NEOX HD Theme: production-oriented high-density glass interface. */
+:root {
+  --neox-bg-primary: #050816;
+  --neox-bg-secondary: #0b1020;
+  --neox-bg-tertiary: #111827;
+  --neox-bg-glass: rgba(17, 24, 39, 0.74);
+  --neox-bg-glass-strong: rgba(15, 23, 42, 0.90);
+  --neox-text-primary: #f8fafc;
+  --neox-text-secondary: rgba(248,250,252,0.68);
+  --neox-text-tertiary: rgba(248,250,252,0.48);
+  --neox-accent: #60a5fa;
+  --neox-accent-hover: #93c5fd;
+  --neox-accent-secondary: #a78bfa;
+  --neox-success: #34d399;
+  --neox-warning: #fbbf24;
+  --neox-danger: #fb7185;
+  --neox-border: rgba(255,255,255,0.12);
+  --neox-border-hot: rgba(96,165,250,0.54);
+  --neox-shadow: rgba(0,0,0,0.48);
+  --neox-blur-amount: 22px;
+  --neox-border-radius: 28px;
+  --neox-animation-duration: 260ms;
+  --neox-animation-curve: cubic-bezier(0.4, 0, 0.2, 1);
+  --neox-font-family: Inter, SF Pro Display, Cantarell, system-ui, sans-serif;
+  --neox-font-size: 15px;
+  --neox-icon-size: 96px;
+  --neox-touch-target: 52px;
+}
+window, .root, .neox-island, .neox-grid-root, .neox-hd-root {
+  font-family: var(--neox-font-family);
+  font-size: var(--neox-font-size);
+  color: var(--neox-text-primary);
+}
+.neox-surface, .neox-hd-card, .neox-hd-glass {
+  background: var(--neox-bg-glass);
+  border: 1px solid var(--neox-border);
+  border-radius: var(--neox-border-radius);
+  box-shadow: 0 24px 64px var(--neox-shadow);
+}
+.neox-surface-strong {
+  background: var(--neox-bg-glass-strong);
+  border: 1px solid var(--neox-border);
+  border-radius: var(--neox-border-radius);
+  box-shadow: 0 24px 64px var(--neox-shadow);
+}
+button {
+  min-height: var(--neox-touch-target);
+  border-radius: 18px;
+  padding: 9px 15px;
+  background: rgba(255,255,255,0.08);
+  color: var(--neox-text-primary);
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: all var(--neox-animation-duration) var(--neox-animation-curve);
+}
+button:hover {
+  background: rgba(96,165,250,0.22);
+  border-color: var(--neox-border-hot);
+  box-shadow: 0 16px 38px rgba(0,0,0,0.28);
+}
+button:active { transform: scale(0.97); }
+entry, searchentry {
+  min-height: var(--neox-touch-target);
+  border-radius: 999px;
+  padding: 0 18px;
+  background: rgba(255,255,255,0.10);
+  color: var(--neox-text-primary);
+  border: 1px solid rgba(255,255,255,0.10);
+  caret-color: var(--neox-accent);
+}
+levelbar trough, scale trough {
+  min-height: 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.10);
+}
+levelbar block.filled, scale highlight {
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--neox-accent), var(--neox-accent-secondary));
+}
+.neox-title-xl {
+  font-size: 56px;
+  font-weight: 950;
+  letter-spacing: -0.055em;
+}
+.neox-title-lg {
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+.neox-caption { color: var(--neox-text-secondary); }
+.neox-danger { color: var(--neox-danger); }
+.neox-warning { color: var(--neox-warning); }
+.neox-success { color: var(--neox-success); }

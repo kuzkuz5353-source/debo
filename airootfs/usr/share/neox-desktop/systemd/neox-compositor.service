@@ -1,0 +1,15 @@
+[Unit]
+Description=NEOX Hyprland compositor session
+Documentation=file:///usr/share/doc/neox-desktop/README.md
+After=systemd-user-sessions.service dbus.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/Hyprland -c %h/.config/hypr/hyprland.conf
+Restart=on-failure
+RestartSec=2
+Environment=XDG_CURRENT_DESKTOP=NEOX:Hyprland
+Environment=XDG_SESSION_TYPE=wayland
+
+[Install]
+WantedBy=default.target
