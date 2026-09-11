@@ -50,8 +50,8 @@ LINUX_TYPE = "0fc63daf-8483-4772-8e79-3d69d8477de4"
 ROOT_TYPES = {LINUX_TYPE, "4f68bce3-e8cd-4db1-96e7-fbcaf984b709"}
 FORBIDDEN_FS = {"crypto_LUKS", "LVM2_member", "linux_raid_member", "zfs_member", "bcache", "BitLocker"}
 MODES = {
-    "wipe": "Diski tamamen sil ve kur",
-    "partition": "Biçimlendirilmiş bölüme kur (ext4)",
+    "wipe": "Diski tamamen sil ve kur (Btrfs, @/@home/@snapshots)",
+    "partition": "Biçimlendirilmiş bölüme kur (mevcut dosya sistemi korunur)",
 }
 DES = {
     "kde": {"name": "KDE Plasma", "ram": 4096, "desc": "Plasma masaüstü (ISO'da önceden indirildi)",
@@ -84,6 +84,7 @@ TOOLS_COMMON = (
     "lsblk", "sfdisk", "blockdev", "udevadm", "findmnt", "mount", "umount",
     "pacstrap", "arch-chroot", "genfstab", "pacman", "pacman-key", "blkid",
     "mkfs.ext4", "e2fsck", "resize2fs", "dumpe2fs", "sync",
+    "mkfs.btrfs", "btrfs",
 )
 
 
@@ -625,6 +626,7 @@ class Plan:
     first_lba: int = 0
     last_lba: int = 0
     root_fsuuid: str = ""
+    root_fstype: str = "btrfs"
     boot_volume_id: str = ""
     bootloader_id: str = ""
     packages: tuple[str, ...] = ()
@@ -649,7 +651,7 @@ class Plan:
             "root": dataclasses.asdict(self.root), "boot": dataclasses.asdict(self.boot),
             "root_existing": self.root_existing, "boot_existing": self.boot_existing,
             "shrink_source": self.shrink_source, "shrink_to_sectors": self.shrink_to_sectors,
-            "root_fsuuid": self.root_fsuuid, "bootloader_id": self.bootloader_id,
+            "root_fsuuid": self.root_fsuuid, "root_fstype": self.root_fstype, "bootloader_id": self.bootloader_id,
             "packages": list(self.packages),
         }
 
@@ -661,10 +663,15 @@ class Plan:
             "", f"Disk: {self.disk.path}   {human_size(self.disk.size)}",
             f"Model: {self.disk.model or '—'}", f"Seri / WWN: {self.disk.serial or self.disk.wwn or 'bildirilmedi'}",
             f"Mod: {MODES[c.mode]}", f"Önyükleme: {self.boot_mode.upper()} / GPT",
-            f"Yeni Linux kökü: {human_size(self.root.size * sector)} — ext4",
+            f"Yeni Linux kökü: {human_size(self.root.size * sector)} — {self.root_fstype}",
             f"Kök konumu: başlangıç sektör {self.root.start}, sektör sayısı {self.root.size}",
             f"Kök bölüm UUID: {self.root.uuid}",
         ]
+        if self.root_fstype == "btrfs":
+            rows += [
+                "Btrfs düzeni: @ (kök), @home (/home), @snapshots (/.snapshots), @var_log (/var/log)",
+                "Hiroki OS Btrfs Asistanı: her paket işleminden önce otomatik snapshot + GRUB'dan geri yükleme aktif olacak.",
+            ]
         if c.mode == "wipe":
             rows += ["", "UYARI: Seçilen diskteki TÜM bölümler ve veriler silinecek.", "Yeni bölüm tablosu ve yeni açılış bölümü oluşturulacak."]
         elif c.mode == "partition":
@@ -783,11 +790,18 @@ def build_plan(c: InstallConfig, disk: BlockNode, table: Optional[PartitionTable
     if root_existing:
         actual_fsuuid = node.fsuuid if node else ""
         root_fsuuid = actual_fsuuid if actual_fsuuid else new_uuid()
+        # Hazır bölüm modunda mevcut dosya sistemi korunur (biçimlendirilmez).
+        root_fstype = node.fstype if node and node.fstype else "ext4"
     else:
         root_fsuuid = new_uuid()
+        # Hiroki OS Btrfs Asistanı için yeni oluşturulan tüm kök bölümler
+        # varsayılan olarak Btrfs ile biçimlendirilir (@ / @home / @snapshots / @var_log).
+        root_fstype = "btrfs"
     return Plan(c, disk, table, boot_mode, root, boot, root_existing, boot_existing,
                 shrink_source, shrink_to, table_id, first_lba, last_lba,
-                root_fsuuid, uuid.uuid4().hex[:8].upper(), "HIROKI-" + uuid.uuid4().hex[:8].upper())
+                root_fsuuid=root_fsuuid, root_fstype=root_fstype,
+                boot_volume_id=uuid.uuid4().hex[:8].upper(),
+                bootloader_id="HIROKI-" + uuid.uuid4().hex[:8].upper())
 
 
 def ext4_fields(text: str) -> dict[str, str]:
@@ -1139,6 +1153,13 @@ class InstallerEngine:
         self._assert_layout_and_nodes(plan)
         if plan.root_existing:
             self.log(f"Mevcut bölüm korunuyor: {plan.root_existing} (yeniden formatlanmaz)")
+        elif plan.root_fstype == "btrfs":
+            self.modified = True
+            self.runner.run(["mkfs.btrfs", "-f", "-L", "hiroki-root", "-U", plan.root_fsuuid,
+                             self.root_node.path], timeout=None, interruptible=False, stream=True)
+            if self._blkid(self.root_node.path, "TYPE") != "btrfs" or self._blkid(self.root_node.path, "UUID").lower() != plan.root_fsuuid:
+                raise InstallerError("Kök dosya sistemi doğrulanamadı.")
+            self._create_btrfs_subvolumes(plan)
         else:
             self.modified = True
             self.runner.run(["mkfs.ext4", "-F", "-L", "hiroki-root", "-U", plan.root_fsuuid,
@@ -1158,6 +1179,28 @@ class InstallerEngine:
                 if self._blkid(self.boot_node.path, "UUID").lower() != original.fsuuid.lower():
                     raise InstallerError("Mevcut EFI dosya sistemi kimliği değişti.")
 
+    def _create_btrfs_subvolumes(self, plan: Plan):
+        """Hiroki OS Btrfs Asistanı için Timeshift/grub-btrfs uyumlu düz (flat)
+        subvolume düzeni oluşturur: @ (kök), @home, @snapshots, @var_log.
+        Bu isimlendirme Timeshift'in beklediği standart @/@home düzenidir.
+        """
+        probe = self.work / "btrfs-init"
+        probe.mkdir(mode=0o700, exist_ok=True)
+        try:
+            self.runner.run(["mount", "-t", "btrfs", "-o", "rw", self.root_node.path, str(probe)],
+                             timeout=None, interruptible=False)
+            try:
+                for subvol in ("@", "@home", "@snapshots", "@var_log"):
+                    self.runner.run(["btrfs", "subvolume", "create", str(probe / subvol)],
+                                     timeout=60, interruptible=False)
+            finally:
+                self.runner.run(["sync"], timeout=None, interruptible=False, ignore_cancel=True)
+                self.runner.run(["umount", "--", str(probe)], timeout=None,
+                                 interruptible=False, ignore_cancel=True)
+        finally:
+            with contextlib.suppress(OSError):
+                probe.rmdir()
+
     def _verify_mounts(self, plan: Plan):
         root = self.inspector.mount_at(self.target)
         valid_fs = {"ext4", "btrfs", "xfs", "ntfs"}
@@ -1173,13 +1216,34 @@ class InstallerEngine:
         if self.inspector.mount_at(self.target):
             raise InstallerError("Oturumun hedef dizini zaten bağlı.")
         fstype = self._blkid(self.root_node.path, "TYPE") or "ext4"
-        mount_opts = "rw,relatime"
+        # Hiroki OS Btrfs Asistanı: yeni oluşturulan Btrfs kökleri @ subvolume'unda
+        # bulunur (Timeshift/grub-btrfs uyumlu flat düzen). Hazır bölüm modunda
+        # kullanıcının kendi mevcut Btrfs düzeni bozulmadan doğrudan mount edilir.
+        use_hiroki_subvols = fstype == "btrfs" and not plan.root_existing
         if fstype == "ntfs":
             mount_opts = "rw,relatime,uid=0,gid=0"
+        elif fstype == "btrfs":
+            mount_opts = "rw,relatime,compress=zstd,space_cache=v2" + (",subvol=@" if use_hiroki_subvols else "")
+        else:
+            mount_opts = "rw,relatime"
         self.runner.run(["mount", "-t", fstype, "-o", mount_opts, self.root_node.path, str(self.target)], timeout=None, interruptible=False)
         root = self.inspector.mount_at(self.target)
         if not root or root.get("maj:min") != self.root_node.major_minor:
             raise InstallerError("Kök mount başarısız/yanlış aygıt.")
+        if use_hiroki_subvols:
+            sub_opts = "rw,relatime,compress=zstd,space_cache=v2"
+            home = self.target / "home"
+            home.mkdir(parents=True, exist_ok=True)
+            self.runner.run(["mount", "-t", "btrfs", "-o", f"{sub_opts},subvol=@home",
+                             self.root_node.path, str(home)], timeout=None, interruptible=False)
+            snapshots = self.target / ".snapshots"
+            snapshots.mkdir(parents=True, exist_ok=True)
+            self.runner.run(["mount", "-t", "btrfs", "-o", f"{sub_opts},subvol=@snapshots",
+                             self.root_node.path, str(snapshots)], timeout=None, interruptible=False)
+            var_log = self.target / "var" / "log"
+            var_log.mkdir(parents=True, exist_ok=True)
+            self.runner.run(["mount", "-t", "btrfs", "-o", f"{sub_opts},subvol=@var_log",
+                             self.root_node.path, str(var_log)], timeout=None, interruptible=False)
         if plan.boot_mode == "uefi":
             esp = self.target / "boot/efi"
             esp.mkdir(parents=True, mode=0o755)

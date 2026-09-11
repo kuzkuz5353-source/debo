@@ -78,6 +78,11 @@ Neox 1.0 için 21 test senaryosu. Her biri ISO derleme sonrası fiziksel/VM orta
 
 ## Yeni Özellikler (Neox)
 
+- [ ] **21b. hiroki-installer otomatik kurulum kökü varsayılan olarak Btrfs mi**
+  - "Diski tamamen sil ve kur" veya "boş alana kur" modlarında kurulum sonrası `findmnt -no FSTYPE /` → `btrfs` dönüyor mu?
+  - `btrfs subvolume list /` çıktısında `@`, `@home`, `@snapshots`, `@var_log` subvolume'ları görünüyor mu; `/home` ve `/.snapshots` ve `/var/log` bu subvolume'lara doğru bağlı mı (`findmnt /home`, `findmnt /.snapshots`, `findmnt /var/log`)?
+  - `/etc/fstab` içinde kök satırında `subvol=@` seçeneği var mı; `grub.cfg` içindeki `linux` satırında `rootflags=subvol=@` otomatik eklenmiş mi?
+  - "Biçimlendirilmiş bölüme kur" modunda kullanıcının önceden hazırladığı bölümün dosya sistemi (ext4/btrfs/xfs/ntfs) değişmeden korunuyor mu (bu mod hâlâ zorunlu Btrfs'e çevrilmiyor)?
 - [ ] **22. Btrfs Asistanı otomatik snapshot alıyor mu**
   - Btrfs kurulumda bir paket kurup/kaldırıp `timeshift --list` çıktısında yeni bir snapshot oluştuğu görülüyor mu? (`/etc/pacman.d/hooks/95-hiroki-btrfs-assistant.hook` PreTransaction'da çalışıyor mu?)
 - [ ] **23. GRUB'dan snapshot ile açılış yapılabiliyor mu**
