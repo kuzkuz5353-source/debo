@@ -1,6 +1,6 @@
 # 🤝 Katkıda Bulunma — Hiroki OS
 
-Sakura yaprakları gibi her katkı değerlidir. Teşekkürler!
+Neox yaprakları gibi her katkı değerlidir. Teşekkürler!
 
 ---
 

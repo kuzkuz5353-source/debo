@@ -102,23 +102,23 @@ chown 1000:1000 /home/live/.bash_profile 2>/dev/null || true
 rm -f /etc/os-release /usr/lib/os-release 2>/dev/null || true
 cat > /etc/os-release << 'OSREL'
 NAME="Hiroki OS"
-PRETTY_NAME="Hiroki OS 1.0 Sakura"
+PRETTY_NAME="Hiroki OS 1.0 (Neox)"
 ID=hiroki
 ID_LIKE=arch
 BUILD_ID=rolling
-VERSION="1.0 Sakura"
+VERSION="1.0 Neox"
 VERSION_ID="1.0"
 HOME_URL="https://hiroki.os"
 BUG_REPORT_URL="https://hiroki.os/issues"
-LOGO=linux
+LOGO=hiroki-neox-logo
 OSREL
 # lsb-release
 rm -f /etc/lsb-release 2>/dev/null || true
 cat > /etc/lsb-release << 'LSB'
 DISTRIB_ID=Hiroki
 DISTRIB_RELEASE=1.0
-DISTRIB_CODENAME=Sakura
-DISTRIB_DESCRIPTION="Hiroki OS 1.0 Sakura"
+DISTRIB_CODENAME=Neox
+DISTRIB_DESCRIPTION="Hiroki OS 1.0 Neox"
 LSB
 
 # Local pacman repo ekle (kurulumda paketler internetten inmesin)

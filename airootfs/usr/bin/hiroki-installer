@@ -75,6 +75,10 @@ BASE_PACKAGES = (
     "pciutils", "noto-fonts", "noto-fonts-emoji", "zram-generator",
     "chafa", "python-pillow", "webkit2gtk-4.1", "firefox",
     "python-pyqt6", "hicolor-icon-theme", "sddm",
+    # Hiroki OS Btrfs Asistanı için gerekli paketler
+    "btrfs-progs", "timeshift", "grub-btrfs", "inotify-tools", "snapper",
+    # Gelişmiş Ağ & DNS Yönetimi için gerekli paketler
+    "iproute2", "iptables-nft",
 )
 TOOLS_COMMON = (
     "lsblk", "sfdisk", "blockdev", "udevadm", "findmnt", "mount", "umount",
@@ -1345,6 +1349,34 @@ class InstallerEngine:
         # SDDM + KDE/LXQt session ayarla
         self._chroot("systemctl", "enable", "NetworkManager.service", "systemd-timesyncd.service", "sddm.service", stream=True)
         self._chroot("systemctl", "set-default", "graphical.target")
+        # Hiroki OS Hello Update: oyun kutuphane/surucu otomatik tamamlama (arka plan)
+        try:
+            self._chroot("systemctl", "enable", "hiroki-hello-update.timer")
+        except CommandError:
+            pass
+        # Hiroki OS Btrfs Asistani: Btrfs ise snapper/grub-btrfsd etkinlestir
+        try:
+            fstype = self._blkid(self.root_node.path, "TYPE") or ""
+        except Exception:
+            fstype = ""
+        if fstype == "btrfs":
+            for svc in ("snapper-timeline.timer", "snapper-cleanup.timer"):
+                try:
+                    self._chroot("systemctl", "enable", svc)
+                except CommandError:
+                    pass
+            try:
+                self._chroot("bash", "-c",
+                    "mkdir -p /etc/systemd/system/grub-btrfsd.service.d && "
+                    "printf '[Service]\\nExecStart=\\nExecStart=/usr/bin/grub-btrfsd --syslog --timeshift-auto\\n' "
+                    "> /etc/systemd/system/grub-btrfsd.service.d/hiroki-timeshift.conf && "
+                    "mkdir -p /etc/default/grub-btrfs && "
+                    "grep -q GRUB_BTRFS_SUBMENUNAME /etc/default/grub-btrfs/config 2>/dev/null || "
+                    "echo 'GRUB_BTRFS_SUBMENUNAME=\"Hiroki OS Neox Snapshots\"' >> /etc/default/grub-btrfs/config"
+                )
+                self._chroot("systemctl", "enable", "grub-btrfsd.service")
+            except CommandError:
+                pass
         # SDDM otomatik giris
         sddm_conf = self.target / "etc/sddm.conf.d"
         sddm_conf.mkdir(parents=True, exist_ok=True)
@@ -1357,10 +1389,10 @@ class InstallerEngine:
             self._install_neox(plan)
         # Hiroki os-release
         self._write_target("etc/os-release",
-            'NAME="Hiroki OS"\nPRETTY_NAME="Hiroki OS 1.0 Sakura"\n'
-            f'ID=hiroki\nID_LIKE=arch\nVERSION="1.0 Sakura"\n'
+            'NAME="Hiroki OS"\nPRETTY_NAME="Hiroki OS 1.0 (Neox)"\n'
+            f'ID=hiroki\nID_LIKE=arch\nVERSION="1.0 Neox"\nVERSION_ID="1.0"\nVERSION_CODENAME=neox\n'
             'HOME_URL="https://hiroki.os"\nBUG_REPORT_URL="https://hiroki.os/issues"\n'
-            'LOGO=linux\n'
+            'LOGO=hiroki-neox-logo\n'
         )
         if c.de == "openbox":
             self._write_target("etc/skel/.config/openbox/autostart", "tint2 &\nnitrogen --restore &\npcmanfm --desktop &\n", 0o755)
@@ -1369,15 +1401,16 @@ class InstallerEngine:
             self._chroot("chown", "-R", f"{c.username}:{c.username}", f"/home/{c.username}/.config")
         # Arch lsb-release temizle
         self._chroot("rm", "-f", "/etc/lsb-release")
-        self._write_target("etc/lsb-release", "DISTRIB_ID=Hiroki\nDISTRIB_RELEASE=1.0\nDISTRIB_CODENAME=Sakura\nDISTRIB_DESCRIPTION=Hiroki OS 1.0 Sakura\n")
+        self._write_target("etc/lsb-release", "DISTRIB_ID=Hiroki\nDISTRIB_RELEASE=1.0\nDISTRIB_CODENAME=Neox\nDISTRIB_DESCRIPTION=Hiroki OS 1.0 Neox\n")
         self._write_target("etc/hiroki-installer-release", f"INSTALLER_VERSION={VERSION}\nBASE=hiroki\nDESKTOP={c.de}\n")
         # Hiroki .dosyalarini kopyala
         hiroki_apps = (
             "hiroki-neofetch", "hiroki-welcome", "hiroki-theme",
             "hiroki-wallpaper", "hiroki-tweaks", "hiroki-update",
             "hiroki-driver", "hiroki-backup", "hiroki-partition", "hiroki-flatpak",
-            "hiroki-kde-setup", "hiroki-acbeni", "hiroki-snapshot",
+            "hiroki-kde-setup", "hiroki-acbeni", "hiroki-btrfs-assistant",
             "hiroki-boot-snapshot", "hiroki-pre-update-snapshot",
+            "hiroki-network-manager", "hiroki-kernel-manager", "hiroki-hello-update",
         )
         for f in hiroki_apps:
             src = Path("/usr/bin") / f
@@ -1392,17 +1425,26 @@ class InstallerEngine:
             shutil.copy2(f, desktop_dst / f.name)
         hiroki_share = self.target / "usr" / "share" / "hiroki"
         hiroki_share.mkdir(parents=True, exist_ok=True)
-        for f in ("hiroki-logo.png",):
+        for f in ("hiroki-logo.png", "hiroki-neox-logo.png"):
             src = Path("/usr/share/hiroki") / f
             if src.is_file():
                 shutil.copy2(src, hiroki_share / f)
-        # Snapshot systemd dosyalari
+        # Snapshot / Hello Update systemd dosyalari
         systemd_dst = self.target / "etc" / "systemd" / "system"
         systemd_dst.mkdir(parents=True, exist_ok=True)
-        for f in ("hiroki-boot-snapshot.service", "hiroki-boot-snapshot.timer"):
+        for f in (
+            "hiroki-boot-snapshot.service", "hiroki-boot-snapshot.timer",
+            "hiroki-hello-update.service", "hiroki-hello-update.timer",
+        ):
             src = Path("/etc/systemd/system") / f
             if src.is_file():
                 shutil.copy2(src, systemd_dst / f)
+        # Btrfs Asistani pacman hook'u (her kurulum/kaldirma/guncelleme oncesi otomatik snapshot)
+        hooks_dst = self.target / "etc" / "pacman.d" / "hooks"
+        hooks_dst.mkdir(parents=True, exist_ok=True)
+        hook_src = Path("/etc/pacman.d/hooks/95-hiroki-btrfs-assistant.hook")
+        if hook_src.is_file():
+            shutil.copy2(hook_src, hooks_dst / "95-hiroki-btrfs-assistant.hook")
         # Snapshot ayarlari
         hiroki_etc = self.target / "etc" / "hiroki"
         hiroki_etc.mkdir(parents=True, exist_ok=True)

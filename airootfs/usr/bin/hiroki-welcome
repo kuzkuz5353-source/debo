@@ -91,7 +91,7 @@ def main():
         title.setStyleSheet("color: #d34188; margin-bottom: 10px;")
         layout.addWidget(title)
 
-        subtitle = QLabel("Sakura 1.0")
+        subtitle = QLabel("Neox 1.0")
         subtitle.setFont(QFont("Sans Serif", 12))
         subtitle.setAlignment(Qt.AlignmentFlag.AlignCenter)
         subtitle.setStyleSheet("color: #888; margin-bottom: 20px;")
@@ -220,7 +220,7 @@ def main():
         # Terminal modu
         print()
         print("  \033[1;35mHiroki OS'ye Hos Geldin!\033[0m")
-        print("  \033[2mSakura 1.0\033[0m")
+        print("  \033[2mNeox 1.0\033[0m")
         print()
         print("  Linux'a yeni mi basladin? (evet/hayir): ", end="")
         answer = input().strip().lower()

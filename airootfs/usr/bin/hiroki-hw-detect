@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Hiroki OS - Donanım Algılama Motoru
-# Sakura 1.0 - hiroki-hw-detect
+# Neox 1.0 - hiroki-hw-detect
 # /proc/meminfo, /proc/cpuinfo, lspci, lsblk, systemd-detect-virt kullanarak analiz yapar
 # Çıktı: JSON -> /tmp/hiroki-hw-info.json ve STDOUT
 

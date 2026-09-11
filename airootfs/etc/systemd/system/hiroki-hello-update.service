@@ -1,0 +1,12 @@
+[Unit]
+Description=Hiroki OS Hello Update - Oyun kütüphane/sürücü otomatik tamamlama
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=!/var/lib/hiroki/hello-update-disabled
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/hiroki-hello-update --auto
+Nice=15
+IOSchedulingClass=idle
+User=root

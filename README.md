@@ -1,10 +1,10 @@
-# 🌸 Hiroki OS 1.0 Sakura
+# 🌸 Hiroki OS 1.0 Neox
 
-**Arch Linux tabanlı, Calamares yükleyicili, sakura gibi zarif dağıtım.**
+**Arch Linux tabanlı, Calamares yükleyicili, neox gibi zarif dağıtım.**
 
 > Felsefe: *Donanımını tanı, ona en uygun masaüstü ortamını öner ama asla zorla. Kullanıcı her zaman son kararı verir.*
 
-[![Versiyon](https://img.shields.io/badge/version-1.0%20Sakura-E91E8C?style=flat-square)](https://hiroki-os.org)
+[![Versiyon](https://img.shields.io/badge/version-1.0%20Neox-E91E8C?style=flat-square)](https://hiroki-os.org)
 [![Taban](https://img.shields.io/badge/taban-Arch%20Linux-1793D1?style=flat-square)](https://archlinux.org)
 [![Yükleyici](https://img.shields.io/badge/yükleyici-Calamares-2D1B69?style=flat-square)](https://calamares.io)
 [![Lisans](https://img.shields.io/badge/lisans-GPLv3-00D4AA?style=flat-square)](LICENSE)
@@ -26,13 +26,17 @@
   - Renkler: `#2D1B69` (koyu mor), `#E91E8C` (pembe), `#00D4AA` (turkuaz), `#0D0D1A` / `#1A1A2E` (koyu arkaplan)
   - **Hiroki-Dark** GTK2/3 teması (Arc Dark tabanlı)
   - **Hiroki-Icons** (Papirus Dark tabanlı, mor klasörler)
-  - 5 özel duvar kağıdı: sakura-gradients, geometrik dalgalar, minimalist dağ, soyut neon, uzay teması
+  - 5 özel duvar kağıdı: neox-gradients, geometrik dalgalar, minimalist dağ, soyut neon, uzay teması
   - GRUB, LightDM/SDDM/GDM, Plymouth temaları
 - **Calamares Entegrasyonu:** Welcome → Locale → Keyboard → Partition (Btrfs subvolume `@`, `@home`, `@snapshots`) → **hiroki-de-select** → Netinstall → Users → Summary → Install
 - **Hoş Geldiniz Merkezi (hiroki-welcome):** Live ve ilk açılışta donanım özetini, öneriyi ve hızlı eylemleri gösterir (GTK3/Python)
-- **Araçlar:** `hiroki-theme-manager`, `hiroki-update` (pacman + AUR), `hiroki-snapshot` (Btrfs/Timeshift), `hiroki-driver-manager` (NVIDIA odaklı)
+- **Araçlar:** `hiroki-theme-manager`, `hiroki-update` (pacman + AUR), `hiroki-btrfs-assistant` (Btrfs/Timeshift), `hiroki-driver-manager` (NVIDIA odaklı)
 - **Türkçe Varsayılan, Çok Dilli:** `tr_TR.UTF-8`, `en_US.UTF-8`, `ja_JP.UTF-8` (+ de, fr vb.)
 - **Btrfs + Timeshift, PipeWire, NetworkManager, UFW, CUPS, Bluetooth**
+- **🧊 Hiroki OS Btrfs Asistanı (`hiroki-btrfs-assistant`)** — Her paket kurulumu/güncellemesi/kaldırma işleminden önce pacman hook'u üzerinden otomatik Btrfs anlık görüntüsü (snapshot) alır; `grub-btrfsd` ile bu snapshotlar GRUB önyükleme menüsüne ("Hiroki OS Neox Snapshots" alt menüsü) otomatik eklenir, böylece bir sorun anında doğrudan GRUB'dan eski bir snapshot ile açılış yapıp sisteminizi tek tıkla geri döndürebilirsiniz.
+- **🌐 Gelişmiş Ağ & DNS Yönetimi (`hiroki-network-manager`)** — Cloudflare, Google, Quad9, OpenDNS, AdGuard, Yandex gibi hazır sağlayıcılar arasında tek tıkla, sistem genelinde DNS değiştirme; ayrıca ana sistem ağınızdan tamamen bağımsız/izole çalışan ayrı bir "İzole İnternet Sürücüsü" (network namespace tabanlı) ile seçtiğiniz uygulamaları izole ağ üzerinden çalıştırabilme.
+- **🐧 Hiroki OS Kernel Manager (`hiroki-kernel-manager`)** — Oyun performansı için özel olarak optimize edilmiş çekirdekleri (Linux-Zen, Linux-CachyOS BORE, Linux-Xanmod, Linux-LTS, Linux-Hardened) listeler, tek tıkla indirir, kurar ve GRUB menüsüne otomatik entegre eder.
+- **🎮 Hiroki OS Hello Update (`hiroki-hello-update`)** — Oyunların stabil çalışması için gereken GPU sürücülerini, 32-bit uyumluluk kütüphanelerini, Wine/Proton bağımlılıklarını ve performans yardımcılarını (GameMode, MangoHUD, Vulkan araçları vb.) otomatik tespit eder; eksikleri tek tıkla veya tamamen arka planda (günlük zamanlayıcı ile) kurar.
 
 ---
 
@@ -42,7 +46,7 @@
 
 | Duvar Kağıdı | Açıklama |
 |---|---|
-| `sakura-gradient.jpg` | Varsayılan: koyu lacivert üzerine mor→pembe gradyan sakura dalı |
+| `neox-gradient.jpg` | Varsayılan: koyu lacivert üzerine mor→pembe gradyan neox dalı |
 | `geometric-waves.jpg` | Geometrik dalgalar, turkuaz vurgu |
 | `minimal-mountain.jpg` | Minimalist dağ, sisli |
 | `abstract-neon.jpg` | Soyut neon ışıklar |
@@ -121,7 +125,7 @@ Tam harita: `CUSTOMIZATION.md` ve `docs/FILEMAP.md`
 
 ## 🤝 Katkıda Bulunma
 
-Katkılarınız sakura yaprakları gibi değerli! Bkz. [CONTRIBUTING.md](CONTRIBUTING.md)
+Katkılarınız neox yaprakları gibi değerli! Bkz. [CONTRIBUTING.md](CONTRIBUTING.md)
 
 1. Fork → branch (`feature/tema-v2`)
 2. Commit (`git commit -m "feat: Hyprland blur eklendi"`)
@@ -144,4 +148,4 @@ GPL-3.0 — Bkz. [LICENSE](LICENSE)
 - Destek: https://hiroki-os.org/support
 - Sürüm Notları: https://hiroki-os.org/releases/1.0
 
-> Hiroki OS, Arch Linux topluluğuna ve açık kaynak dünyasına teşekkür eder. Sakura gibi zarif, Arch gibi güçlü kalın.
+> Hiroki OS, Arch Linux topluluğuna ve açık kaynak dünyasına teşekkür eder. Neox gibi zarif, Arch gibi güçlü kalın.

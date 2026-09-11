@@ -1,0 +1,350 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""Hiroki OS Neox - Gelişmiş Ağ & DNS Yöneticisi
+
+İki temel özellik sunar:
+  1. Tek Tıkla DNS Değiştirme: NetworkManager üzerinden sistem genelinde
+     (tüm bağlantılar için) hazır DNS sağlayıcı setlerinden birine anında
+     geçiş yapar (Cloudflare, Google, Quad9, OpenDNS, AdGuard, Yandex).
+  2. İzole İnternet Sürücüsü: `hiroki-isolated-net` adında, sistemin geri
+     kalanından bağımsız çalışan ayrı bir network namespace (netns) üzerinde
+     internet bağlantısı kurar/keser. Bu sayede tek bir uygulamayı (ör. bir
+     oyun/torrent istemcisi) ana sistem ağ trafiğinden tamamen izole ederek
+     çalıştırabilirsiniz.
+
+PyQt6 tabanlıdır, root gereken işlemler `pkexec` ile yapılır.
+"""
+
+import sys
+import os
+import subprocess
+import shutil
+
+try:
+    from PyQt6.QtWidgets import (
+        QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
+        QLabel, QPushButton, QFrame, QGroupBox, QComboBox, QLineEdit,
+        QMessageBox, QTextEdit, QCheckBox, QScrollArea
+    )
+    from PyQt6.QtCore import Qt, QThread, pyqtSignal
+    from PyQt6.QtGui import QFont, QPalette, QColor
+except ImportError:
+    print("Hata: PyQt6 bulunamadi. 'pacman -S python-pyqt6' ile kurun.")
+    sys.exit(1)
+
+ACCENT = "#00D4AA"
+BG_MAIN = "#111111"
+BG_CARD = "#1a1a1a"
+BG_INPUT = "#222222"
+TEXT_COLOR = "#e0e0e0"
+TEXT_DIM = "#888888"
+BORDER_COLOR = "#333333"
+SUCCESS = "#4caf50"
+ERROR = "#f44336"
+
+ISOLATED_NS = "hiroki-isolated-net"
+ISOLATED_VETH_HOST = "hveth0"
+ISOLATED_VETH_NS = "hveth1"
+ISOLATED_NET_CIDR_HOST = "10.199.0.1/24"
+ISOLATED_NET_CIDR_NS = "10.199.0.2/24"
+
+DNS_PROVIDERS = {
+    "Cloudflare (Hızlı, Gizlilik Odaklı)": ["1.1.1.1", "1.0.0.1"],
+    "Google Public DNS": ["8.8.8.8", "8.8.4.4"],
+    "Quad9 (Güvenlik Odaklı)": ["9.9.9.9", "149.112.112.112"],
+    "OpenDNS": ["208.67.222.222", "208.67.220.220"],
+    "AdGuard DNS (Reklam Engelleyici)": ["94.140.14.14", "94.140.15.15"],
+    "Yandex DNS": ["77.88.8.8", "77.88.8.1"],
+    "Sistem Varsayılanı (DHCP)": [],
+}
+
+
+def run_cmd(cmd, timeout=15, shell=False):
+    try:
+        r = subprocess.run(
+            cmd, shell=shell, capture_output=True, text=True, timeout=timeout
+        )
+        return r.stdout.strip(), r.stderr.strip(), r.returncode
+    except FileNotFoundError:
+        return "", "Komut bulunamadı", -1
+    except subprocess.TimeoutExpired:
+        return "", "Zaman aşımı", -1
+    except Exception as e:
+        return "", str(e), -1
+
+
+def run_pkexec(cmd_str, timeout=30):
+    return run_cmd(["pkexec", "bash", "-c", cmd_str], timeout=timeout)
+
+
+def get_active_connections():
+    out, _, code = run_cmd(["nmcli", "-t", "-f", "NAME,DEVICE,TYPE", "connection", "show", "--active"])
+    conns = []
+    if code == 0:
+        for line in out.splitlines():
+            parts = line.split(":")
+            if len(parts) >= 2 and parts[1] and parts[1] != "lo":
+                conns.append(parts[0])
+    return conns
+
+
+class ApplyDnsWorker(QThread):
+    done = pyqtSignal(bool, str)
+
+    def __init__(self, dns_servers):
+        super().__init__()
+        self.dns_servers = dns_servers
+
+    def run(self):
+        conns = get_active_connections()
+        if not conns:
+            self.done.emit(False, "Aktif bir ağ bağlantısı bulunamadı.")
+            return
+        errors = []
+        for conn in conns:
+            if self.dns_servers:
+                dns_str = " ".join(self.dns_servers)
+                cmd = (
+                    f"nmcli connection modify '{conn}' ipv4.dns '{dns_str}' "
+                    f"ipv4.ignore-auto-dns yes && "
+                    f"nmcli connection up '{conn}'"
+                )
+            else:
+                cmd = (
+                    f"nmcli connection modify '{conn}' ipv4.dns '' "
+                    f"ipv4.ignore-auto-dns no && "
+                    f"nmcli connection up '{conn}'"
+                )
+            _, err, code = run_pkexec(cmd, timeout=30)
+            if code != 0:
+                errors.append(f"{conn}: {err}")
+        if errors:
+            self.done.emit(False, "; ".join(errors))
+        else:
+            self.done.emit(True, f"{len(conns)} bağlantı için DNS güncellendi.")
+
+
+class IsolatedNetWorker(QThread):
+    done = pyqtSignal(bool, str)
+
+    def __init__(self, enable):
+        super().__init__()
+        self.enable = enable
+
+    def run(self):
+        if self.enable:
+            script = f"""
+set -e
+ip netns add {ISOLATED_NS} 2>/dev/null || true
+ip link add {ISOLATED_VETH_HOST} type veth peer name {ISOLATED_VETH_NS} 2>/dev/null || true
+ip link set {ISOLATED_VETH_NS} netns {ISOLATED_NS}
+ip addr add {ISOLATED_NET_CIDR_HOST} dev {ISOLATED_VETH_HOST} 2>/dev/null || true
+ip link set {ISOLATED_VETH_HOST} up
+ip netns exec {ISOLATED_NS} ip addr add {ISOLATED_NET_CIDR_NS} dev {ISOLATED_VETH_NS} 2>/dev/null || true
+ip netns exec {ISOLATED_NS} ip link set {ISOLATED_VETH_NS} up
+ip netns exec {ISOLATED_NS} ip link set lo up
+ip netns exec {ISOLATED_NS} ip route add default via 10.199.0.1 2>/dev/null || true
+echo 1 > /proc/sys/net/ipv4/ip_forward
+DEFROUTE=$(ip route show default | awk '/default/ {{print $5; exit}}')
+if [ -n "$DEFROUTE" ]; then
+    iptables -t nat -C POSTROUTING -s 10.199.0.0/24 -o "$DEFROUTE" -j MASQUERADE 2>/dev/null || \
+    iptables -t nat -A POSTROUTING -s 10.199.0.0/24 -o "$DEFROUTE" -j MASQUERADE
+    iptables -C FORWARD -i {ISOLATED_VETH_HOST} -o "$DEFROUTE" -j ACCEPT 2>/dev/null || \
+    iptables -A FORWARD -i {ISOLATED_VETH_HOST} -o "$DEFROUTE" -j ACCEPT
+    iptables -C FORWARD -i "$DEFROUTE" -o {ISOLATED_VETH_HOST} -m state --state RELATED,ESTABLISHED -j ACCEPT 2>/dev/null || \
+    iptables -A FORWARD -i "$DEFROUTE" -o {ISOLATED_VETH_HOST} -m state --state RELATED,ESTABLISHED -j ACCEPT
+fi
+mkdir -p /etc/netns/{ISOLATED_NS}
+echo "nameserver 1.1.1.1" > /etc/netns/{ISOLATED_NS}/resolv.conf
+echo "nameserver 9.9.9.9" >> /etc/netns/{ISOLATED_NS}/resolv.conf
+echo OK
+"""
+            out, err, code = run_pkexec(script, timeout=30)
+            if code == 0:
+                self.done.emit(True, "İzole internet sürücüsü etkinleştirildi. Bir uygulamayı içinde çalıştırmak için:\n"
+                                      f"  sudo ip netns exec {ISOLATED_NS} sudo -u $USER <uygulama>")
+            else:
+                self.done.emit(False, err or "İzole ağ oluşturulamadı.")
+        else:
+            script = f"""
+ip link del {ISOLATED_VETH_HOST} 2>/dev/null || true
+ip netns del {ISOLATED_NS} 2>/dev/null || true
+echo OK
+"""
+            out, err, code = run_pkexec(script, timeout=20)
+            self.done.emit(code == 0, "İzole ağ sürücüsü kapatıldı." if code == 0 else (err or "Kapatılamadı."))
+
+
+def is_isolated_active():
+    out, _, code = run_cmd(["ip", "netns", "list"])
+    return ISOLATED_NS in out
+
+
+class HirokiNetworkManager(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Hiroki OS Neox - Gelişmiş Ağ & DNS Yöneticisi")
+        self.setMinimumSize(640, 560)
+        self.dns_worker = None
+        self.isolated_worker = None
+        self._build_ui()
+        self._refresh_isolated_status()
+
+    def _build_ui(self):
+        central = QWidget()
+        self.setCentralWidget(central)
+        outer = QVBoxLayout(central)
+        outer.setContentsMargins(20, 20, 20, 20)
+        outer.setSpacing(16)
+
+        title = QLabel("Gelişmiş Ağ & DNS Yönetimi")
+        title.setStyleSheet(f"color: {ACCENT}; font-size: 20px; font-weight: bold;")
+        outer.addWidget(title)
+
+        subtitle = QLabel("Tek tıkla DNS değiştirme ve sistemden bağımsız izole internet sürücüsü")
+        subtitle.setStyleSheet(f"color: {TEXT_DIM}; font-size: 12px;")
+        outer.addWidget(subtitle)
+
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        inner = QWidget()
+        il = QVBoxLayout(inner)
+        il.setSpacing(16)
+
+        # --- DNS Group ---
+        dns_group = QGroupBox("Tek Tıkla DNS Değiştir")
+        dl = QVBoxLayout(dns_group)
+        dl.setSpacing(10)
+        info = QLabel("Bir DNS sağlayıcısı seçin; tüm aktif ağ bağlantılarınıza anında uygulanır.")
+        info.setWordWrap(True)
+        info.setStyleSheet(f"color: {TEXT_DIM}; font-size: 11px;")
+        dl.addWidget(info)
+
+        self.dns_combo = QComboBox()
+        self.dns_combo.addItems(list(DNS_PROVIDERS.keys()))
+        dl.addWidget(self.dns_combo)
+
+        btn_apply_dns = QPushButton("DNS'i Uygula")
+        btn_apply_dns.clicked.connect(self.on_apply_dns)
+        dl.addWidget(btn_apply_dns)
+
+        self.dns_status = QLabel("")
+        self.dns_status.setWordWrap(True)
+        self.dns_status.setStyleSheet(f"color: {TEXT_DIM}; font-size: 11px;")
+        dl.addWidget(self.dns_status)
+        il.addWidget(dns_group)
+
+        # --- Isolated Net Group ---
+        iso_group = QGroupBox("İzole İnternet Sürücüsü")
+        iol = QVBoxLayout(iso_group)
+        iol.setSpacing(10)
+        iso_info = QLabel(
+            "Sistemin geri kalanından tamamen bağımsız, ayrı bir ağ ortamı "
+            "(network namespace) oluşturur. Bu sanal ağı kullanan uygulamaların "
+            "trafiği ana sistem ağınızdan izole edilir."
+        )
+        iso_info.setWordWrap(True)
+        iso_info.setStyleSheet(f"color: {TEXT_DIM}; font-size: 11px;")
+        iol.addWidget(iso_info)
+
+        self.iso_status = QLabel("Durum: kontrol ediliyor...")
+        self.iso_status.setStyleSheet(f"color: {TEXT_COLOR}; font-size: 12px; font-weight: bold;")
+        iol.addWidget(self.iso_status)
+
+        btn_row = QHBoxLayout()
+        self.btn_iso_enable = QPushButton("İzole Ağı Etkinleştir")
+        self.btn_iso_enable.clicked.connect(lambda: self.on_toggle_isolated(True))
+        btn_row.addWidget(self.btn_iso_enable)
+        self.btn_iso_disable = QPushButton("İzole Ağı Kapat")
+        self.btn_iso_disable.clicked.connect(lambda: self.on_toggle_isolated(False))
+        btn_row.addWidget(self.btn_iso_disable)
+        iol.addLayout(btn_row)
+
+        usage = QTextEdit()
+        usage.setReadOnly(True)
+        usage.setMaximumHeight(70)
+        usage.setPlainText(
+            f"Kullanım: sudo ip netns exec {ISOLATED_NS} sudo -u $USER <uygulama_komutu>\n"
+            "Örnek: sudo ip netns exec hiroki-isolated-net sudo -u $USER firefox"
+        )
+        iol.addWidget(usage)
+        il.addWidget(iso_group)
+
+        il.addStretch()
+        scroll.setWidget(inner)
+        outer.addWidget(scroll, 1)
+
+        btn_close = QPushButton("Kapat")
+        btn_close.clicked.connect(self.close)
+        outer.addWidget(btn_close)
+
+        self.setStyleSheet(f"""
+            QMainWindow, QWidget {{ background-color: {BG_MAIN}; color: {TEXT_COLOR}; }}
+            QGroupBox {{
+                border: 1px solid {BORDER_COLOR}; border-radius: 8px;
+                margin-top: 12px; padding: 14px 10px 10px 10px;
+                font-weight: bold; color: {ACCENT}; background-color: {BG_CARD};
+            }}
+            QGroupBox::title {{ subcontrol-origin: margin; left: 12px; padding: 0 6px; }}
+            QPushButton {{
+                background-color: #1e1e1e; color: {TEXT_COLOR}; border: 1px solid {BORDER_COLOR};
+                border-radius: 6px; padding: 8px 14px;
+            }}
+            QPushButton:hover {{ background-color: {ACCENT}; color: #06231d; }}
+            QComboBox, QLineEdit, QTextEdit {{
+                background-color: {BG_INPUT}; color: {TEXT_COLOR}; border: 1px solid {BORDER_COLOR};
+                border-radius: 6px; padding: 6px;
+            }}
+        """)
+
+    def _refresh_isolated_status(self):
+        active = is_isolated_active()
+        if active:
+            self.iso_status.setText("Durum: ✅ Aktif")
+            self.iso_status.setStyleSheet(f"color: {SUCCESS}; font-size: 12px; font-weight: bold;")
+        else:
+            self.iso_status.setText("Durum: ⛔ Pasif")
+            self.iso_status.setStyleSheet(f"color: {TEXT_DIM}; font-size: 12px; font-weight: bold;")
+
+    def on_apply_dns(self):
+        provider = self.dns_combo.currentText()
+        servers = DNS_PROVIDERS[provider]
+        self.dns_status.setText("Uygulanıyor...")
+        self.dns_worker = ApplyDnsWorker(servers)
+        self.dns_worker.done.connect(self._on_dns_done)
+        self.dns_worker.start()
+
+    def _on_dns_done(self, success, msg):
+        color = SUCCESS if success else ERROR
+        self.dns_status.setText(msg)
+        self.dns_status.setStyleSheet(f"color: {color}; font-size: 11px;")
+
+    def on_toggle_isolated(self, enable):
+        if not shutil.which("ip"):
+            QMessageBox.warning(self, "Hata", "'ip' komutu (iproute2) bulunamadı.")
+            return
+        self.iso_status.setText("Durum: işleniyor...")
+        self.isolated_worker = IsolatedNetWorker(enable)
+        self.isolated_worker.done.connect(self._on_isolated_done)
+        self.isolated_worker.start()
+
+    def _on_isolated_done(self, success, msg):
+        if success:
+            QMessageBox.information(self, "Hiroki OS Neox", msg)
+        else:
+            QMessageBox.warning(self, "Hata", msg)
+        self._refresh_isolated_status()
+
+
+def main():
+    app = QApplication(sys.argv)
+    app.setApplicationName("Hiroki OS Ağ & DNS Yöneticisi")
+    app.setStyle("Fusion")
+    window = HirokiNetworkManager()
+    window.show()
+    sys.exit(app.exec())
+
+
+if __name__ == "__main__":
+    main()

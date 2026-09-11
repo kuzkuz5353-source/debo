@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Hiroki OS - ISO Derleme Scripti
-# Sakura 1.0 - Archiso tabanlı
+# Neox 1.0 - Archiso tabanlı
 # Kullanım: sudo ./build.sh
 # Gereksinimler: archiso, squashfs-tools, grub, edk2-ovmf, dosfstools, erofs-utils
 
@@ -106,7 +106,7 @@ setup_airootfs() {
         "airootfs/usr/bin/hiroki-welcome"
         "airootfs/usr/bin/hiroki-theme-manager"
         "airootfs/usr/bin/hiroki-update"
-        "airootfs/usr/bin/hiroki-snapshot"
+        "airootfs/usr/bin/hiroki-btrfs-assistant"
         "airootfs/usr/bin/hiroki-driver-manager"
         "airootfs/etc/hiroki/post-install/hiroki-post-install.sh"
     )
@@ -131,7 +131,7 @@ setup_themes() {
         "airootfs/usr/share/themes/Hiroki-Dark/gtk-3.0/gtk.css"
         "airootfs/usr/share/icons/Hiroki-Icons/index.theme"
         "airootfs/usr/share/grub/themes/hiroki/theme.txt"
-        "airootfs/usr/share/hiroki/wallpapers/sakura-gradient.jpg"
+        "airootfs/usr/share/hiroki/wallpapers/neox-gradient.jpg"
     )
     for f in "${theme_files[@]}"; do
         if [[ -f "$PROFILE_DIR/$f" ]]; then
@@ -156,7 +156,7 @@ setup_welcome() {
 
 setup_custom_tools() {
     log "Özel araçlar kontrol ediliyor..."
-    local tools=(hiroki-de-selector hiroki-theme-manager hiroki-update hiroki-snapshot hiroki-driver-manager)
+    local tools=(hiroki-de-selector hiroki-theme-manager hiroki-update hiroki-btrfs-assistant hiroki-driver-manager hiroki-network-manager hiroki-kernel-manager hiroki-hello-update)
     for t in "${tools[@]}"; do
         if [[ -f "$PROFILE_DIR/airootfs/usr/bin/$t" ]]; then
             ok "Araç: $t"
@@ -212,7 +212,7 @@ build_iso() {
         log "Gerçek derleme için Arch Linux'ta çalıştırın: sudo mkarchiso -v -w /tmp/hiroki-work -o ./out ./"
         # Simülasyon: sahte ISO oluştur
         mkdir -p "$OUT_DIR"
-        echo "Hiroki OS 1.0 Sakura - Simülasyon ISO (gerçek derleme Arch Linux gerektirir)" > "$OUT_DIR/$ISO_NAME.info"
+        echo "Hiroki OS 1.0 Neox - Simülasyon ISO (gerçek derleme Arch Linux gerektirir)" > "$OUT_DIR/$ISO_NAME.info"
         log "Simülasyon dosyası: $OUT_DIR/$ISO_NAME.info"
     fi
 }
@@ -228,7 +228,7 @@ generate_checksums() {
             echo "ISO: $iso" > "$iso.info"
             echo "Boyut: $(du -h "$iso" | cut -f1)" >> "$iso.info"
             echo "Tarih: $(date -Iseconds)" >> "$iso.info"
-            echo "Profil: Hiroki OS 1.0 Sakura" >> "$iso.info"
+            echo "Profil: Hiroki OS 1.0 Neox" >> "$iso.info"
             cat "$iso.info"
         fi
     done
@@ -238,7 +238,7 @@ generate_checksums() {
 final_info() {
     echo ""
     echo -e "${PINK}═══════════════════════════════════════════${NC}"
-    echo -e "${PINK}  Hiroki OS 1.0 Sakura — Derleme Tamamlandı 🌸${NC}"
+    echo -e "${PINK}  Hiroki OS 1.0 Neox — Derleme Tamamlandı 🌸${NC}"
     echo -e "${PINK}═══════════════════════════════════════════${NC}"
     echo -e "  Çıktı dizini: ${GREEN}$OUT_DIR${NC}"
     ls -lh "$OUT_DIR"/ 2>/dev/null || echo "  (henüz ISO yok - simülasyon)"
@@ -262,8 +262,8 @@ main() {
  |  _  | | | | (_) |   <| | |_| |___) |
  |_| |_|_|_|  \___/|_|\_\_|\___/|____/
 
-  Hiroki OS 1.0 Sakura — ISO Derleme Aracı
-  Arch Linux tabanlı • Calamares • Sakura gibi zarif
+  Hiroki OS 1.0 Neox — ISO Derleme Aracı
+  Arch Linux tabanlı • Calamares • Neox gibi zarif
 EOS
     echo -e "${NC}"
 

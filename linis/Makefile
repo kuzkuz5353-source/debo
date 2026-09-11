@@ -49,7 +49,7 @@ install: all
 	install -m 0644 files/usr/share/linis/keybinds.conf $(SHRDIR)/
 	install -m 0755 files/usr/share/linis/autostart $(SHRDIR)/
 	install -m 0644 files/usr/share/linis/logo.png $(SHRDIR)/
-	install -m 0644 files/usr/share/linis/wallpapers/sakura-gradient.jpg \
+	install -m 0644 files/usr/share/linis/wallpapers/neox-gradient.jpg \
 	        $(SHRDIR)/wallpapers/
 	install -m 0644 files/etc/xdg/linis/config.toml $(XDGIR)/
 	install -m 0644 files/usr/share/xsessions/linis.desktop $(XSDIR)/

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hiroki OS 1.0 Sakura — Proje Özeti</title>
+<title>Hiroki OS 1.0 Neox — Proje Özeti</title>
 <style>
 :root { --mor:#2D1B69; --pembe:#E91E8C; --turkuaz:#00D4AA; --koyu:#0D0D1A; --lacivert:#1A1A2E; --acik:#EAEAEA; --gri:#A0A0B8; }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -44,8 +44,8 @@ a:hover{text-decoration:underline}
 <body>
 <header>
 <div style="font-size:48px">🌸</div>
-<h1>Hiroki OS 1.0 Sakura</h1>
-<p>Arch Linux tabanlı • Archiso • Calamares • Sakura gibi zarif</p>
+<h1>Hiroki OS 1.0 Neox</h1>
+<p>Arch Linux tabanlı • Archiso • Calamares • Neox gibi zarif</p>
 <div style="margin-top:12px">
 <span class="badge">HIROKI_OS</span>
 <span class="badge" style="background:var(--pembe);color:#fff">v1.0</span>
@@ -95,7 +95,7 @@ a:hover{text-decoration:underline}
 <div class="section">
 <h2>🖼️ 5 Duvar Kağıdı (Oluşturuldu)</h2>
 <div class="wall">
-<div><img src="airootfs/usr/share/hiroki/wallpapers/sakura-gradient.jpg"><p>sakura-gradient<br>(varsayılan)</p></div>
+<div><img src="airootfs/usr/share/hiroki/wallpapers/neox-gradient.jpg"><p>neox-gradient<br>(varsayılan)</p></div>
 <div><img src="airootfs/usr/share/hiroki/wallpapers/geometric-waves.jpg"><p>geometric-waves</p></div>
 <div><img src="airootfs/usr/share/hiroki/wallpapers/minimal-mountain.jpg"><p>minimal-mountain</p></div>
 <div><img src="airootfs/usr/share/hiroki/wallpapers/abstract-neon.jpg"><p>abstract-neon</p></div>
@@ -112,7 +112,7 @@ a:hover{text-decoration:underline}
 │   │   ├── hostname (hiroki)
 │   │   ├── locale.conf (tr_TR.UTF-8)
 │   │   ├── vconsole.conf (trq)
-│   │   ├── os-release (Hiroki OS 1.0 Sakura)
+│   │   ├── os-release (Hiroki OS 1.0 Neox)
 │   │   ├── lsb-release
 │   │   ├── locale.gen, hosts, mkinitcpio.conf
 │   │   ├── pacman.d/mirrorlist (TR mirror + reflector)
@@ -128,7 +128,7 @@ a:hover{text-decoration:underline}
 │   │   │   └── modules/{welcome,locale,keyboard,partition (Btrfs @),users (wheel),displaymanager (lightdm/sddm/gdm),packagechooser_hiroki (10 DE),netinstall,shell,fstab,bootloader,services-systemd,finished}.conf
 │   │   ├── skel/ (.bashrc Hiroki prompt, .config/autostart/hiroki-welcome, gtk-3.0/settings.ini, xfce4, conky, waybar, wofi, hypr, mako, picom, dunst, fastfetch)
 │   │   └── systemd/system/hiroki-live.service
-│   ├── usr/bin/{hiroki-hw-detect, hiroki-de-selector, hiroki-welcome, hiroki-theme-manager, hiroki-update, hiroki-snapshot, hiroki-driver-manager, hiroki-live-setup}
+│   ├── usr/bin/{hiroki-hw-detect, hiroki-de-selector, hiroki-welcome, hiroki-theme-manager, hiroki-update, hiroki-btrfs-assistant, hiroki-driver-manager, hiroki-network-manager, hiroki-kernel-manager, hiroki-hello-update, hiroki-live-setup}
 │   ├── usr/share/
 │   │   ├── hiroki/{de-selector/hiroki-de-selector.py (GTK grid), wallpapers/5.jpg, ascii/hiroki.txt, neofetch/config.conf}
 │   │   ├── hiroki-welcome/hiroki-welcome.py (Live + İlk Boot)
@@ -163,7 +163,7 @@ Toplam: 114 dosya — tümü kopyala-yapıştır çalışır</div>
 <tr><td>netinstall</td><td>packages (DE paketleri)</td><td>Firefox,VLC vb.</td></tr>
 <tr><td>users</td><td>shell@postinstall (tema+DM+servis)</td><td>wheel, bash</td></tr>
 <tr><td>summary</td><td>grubcfg / bootloader / umount</td><td>Hiroki GRUB</td></tr>
-<tr><td>finished</td><td></td><td>Sakura tamamlandı 🌸</td></tr>
+<tr><td>finished</td><td></td><td>Neox tamamlandı 🌸</td></tr>
 </table>
 </div>
 
@@ -176,7 +176,7 @@ Toplam: 114 dosya — tümü kopyala-yapıştır çalışır</div>
 <p><b>Düşük RAM testi:</b> <span class="kbd">qemu-system-x86_64 -m 512 -cdrom out/*.iso</span> → i3 öneri & uyarı</p>
 <p><b>Donanım algıla:</b> <span class="kbd">hiroki-hw-detect && cat /tmp/hiroki-hw-info.json</span></p>
 <p><b>DE Seçici:</b> <span class="kbd">hiroki-de-selector</span> &nbsp; <b>Welcome:</b> <span class="kbd">hiroki-welcome --force</span></p>
-<p><b>Tema:</b> <span class="kbd">hiroki-theme-manager</span> &nbsp; <b>Güncelle:</b> <span class="kbd">hiroki-update</span> &nbsp; <b>Sürücü:</b> <span class="kbd">hiroki-driver-manager</span></p>
+<p><b>Tema:</b> <span class="kbd">hiroki-theme-manager</span> &nbsp; <b>Güncelle:</b> <span class="kbd">hiroki-update</span> &nbsp; <b>Sürücü:</b> <span class="kbd">hiroki-driver-manager</span> &nbsp; <b>Btrfs:</b> <span class="kbd">hiroki-btrfs-assistant</span> &nbsp; <b>Ağ/DNS:</b> <span class="kbd">hiroki-network-manager</span> &nbsp; <b>Kernel:</b> <span class="kbd">hiroki-kernel-manager</span> &nbsp; <b>Hello Update:</b> <span class="kbd">hiroki-hello-update</span></p>
 </div>
 </div>
 
@@ -192,7 +192,7 @@ Toplam: 114 dosya — tümü kopyala-yapıştır çalışır</div>
 </div>
 
 <footer>
-🌸 Hiroki OS Project — <a href="https://hiroki-os.org">hiroki-os.org</a> • Arch tabanlı • Sakura gibi zarif<br>
+🌸 Hiroki OS Project — <a href="https://hiroki-os.org">hiroki-os.org</a> • Arch tabanlı • Neox gibi zarif<br>
 114 dosya • Tüm yapılandırmalar gerçek ve çalışır • Arch Linux'ta <span class="kbd">sudo ./build.sh</span> ile ISO'ya dönüşür
 </footer>
 </div>

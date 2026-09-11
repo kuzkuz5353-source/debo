@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Hiroki OS Kernel Manager
+Name[tr]=Hiroki OS Kernel Manager
+Comment=Oyun için optimize edilmiş çekirdekleri listele, indir ve kur
+Comment[tr]=Oyun için optimize edilmiş çekirdekleri listele, indir ve kur
+Exec=hiroki-kernel-manager
+Icon=applications-system
+Terminal=false
+Categories=System;Settings;
+StartupNotify=true

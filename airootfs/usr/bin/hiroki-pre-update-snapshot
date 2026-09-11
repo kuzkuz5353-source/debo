@@ -3,7 +3,7 @@
 # hiroki-update tarafindan cagrilir
 
 SETTINGS="/etc/hiroki/snapshot-settings.json"
-LOG="/var/log/hiroki-snapshot.log"
+LOG="/var/log/hiroki-btrfs-assistant.log"
 
 log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >> "$LOG"
@@ -17,7 +17,7 @@ fi
 
 PRE_UPDATE=$(python3 -c "import json; d=json.load(open('$SETTINGS')); print(d.get('pre_update_snapshot', True))" 2>/dev/null)
 
-if [ "$PRE_UPDATE" != "True" && "$PRE_UPDATE" != "true" ]; then
+if [ "$PRE_UPDATE" != "True" ] && [ "$PRE_UPDATE" != "true" ]; then
     echo "false"
     exit 0
 fi
@@ -28,8 +28,8 @@ if ! command -v timeshift &>/dev/null; then
     exit 1
 fi
 
-log "Guncelleme oncesi snapshot aliniyor..."
-timeshift --create --comments "Hiroki guncelleme oncesi" --yes 2>>"$LOG"
+log "Guncelleme/kurulum oncesi otomatik Btrfs Asistani snapshotu aliniyor..."
+timeshift --create --comments "Hiroki OS Neox - Btrfs Asistani otomatik snapshot (guncelleme/kurulum oncesi)" --yes 2>>"$LOG"
 EXIT_CODE=$?
 
 if [ $EXIT_CODE -eq 0 ]; then

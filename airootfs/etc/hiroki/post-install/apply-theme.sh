@@ -133,8 +133,8 @@ EOS
 gsettings set org.gnome.desktop.interface gtk-theme 'Hiroki-Dark' 2>/dev/null || true
 gsettings set org.gnome.desktop.interface icon-theme 'Hiroki-Icons' 2>/dev/null || true
 gsettings set org.gnome.desktop.interface cursor-theme 'Bibata-Modern-Classic' 2>/dev/null || true
-gsettings set org.gnome.desktop.background picture-uri 'file:///usr/share/hiroki/wallpapers/sakura-gradient.jpg' 2>/dev/null || true
-gsettings set org.gnome.desktop.background picture-uri-dark 'file:///usr/share/hiroki/wallpapers/sakura-gradient.jpg' 2>/dev/null || true
+gsettings set org.gnome.desktop.background picture-uri 'file:///usr/share/hiroki/wallpapers/neox-gradient.jpg' 2>/dev/null || true
+gsettings set org.gnome.desktop.background picture-uri-dark 'file:///usr/share/hiroki/wallpapers/neox-gradient.jpg' 2>/dev/null || true
 # Extensions
 gsettings set org.gnome.shell enabled-extensions "['dash-to-dock@micxgx.gmail.com', 'appindicatorsupport@rgcjonas.gmail.com', 'user-theme@gnome-shell-extensions.gcampax.github.com']" 2>/dev/null || true
 rm -f ~/.config/autostart/hiroki-gnome-setup.desktop
@@ -146,7 +146,7 @@ fi
 if [[ "$DE" == "i3wm" ]]; then
     mkdir -p "$SKEL/.config/i3" "$SKEL/.config/polybar" "$SKEL/.config/rofi" "$SKEL/.config/dunst" 2>/dev/null || true
     cat > "$SKEL/.config/i3/config" <<'EOS'
-# Hiroki OS - i3wm Config - Sakura
+# Hiroki OS - i3wm Config - Neox
 # Renkler: #2D1B69 mor, #E91E8C pembe, #00D4AA turkuaz, #0D0D1A koyu, #1A1A2E lacivert
 set $mod Mod4
 set $hiroki_bg #0D0D1A
@@ -180,7 +180,7 @@ exec --no-startup-id picom --experimental-backends &
 exec --no-startup-id dunst &
 exec --no-startup-id nm-applet &
 exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
-exec --no-startup-id feh --bg-scale /usr/share/hiroki/wallpapers/sakura-gradient.jpg
+exec --no-startup-id feh --bg-scale /usr/share/hiroki/wallpapers/neox-gradient.jpg
 
 # Kısayollar
 bindsym $mod+Return exec alacritty
@@ -234,7 +234,7 @@ fi
 if [[ "$DE" == "hyprland" ]]; then
     mkdir -p "$SKEL/.config/hypr" "$SKEL/.config/waybar" 2>/dev/null || true
     cat > "$SKEL/.config/hypr/hyprland.conf" <<'EOS'
-# Hiroki OS - Hyprland Config - Sakura
+# Hiroki OS - Hyprland Config - Neox
 # Renkler Hiroki paleti
 general {
     gaps_in = 6

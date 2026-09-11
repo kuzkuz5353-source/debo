@@ -1,6 +1,6 @@
 # 🔨 Hiroki OS Derleme Kılavuzu
 
-Bu belge Hiroki OS 1.0 Sakura ISO'sunu sıfırdan nasıl derleyeceğinizi adım adım anlatır.
+Bu belge Hiroki OS 1.0 Neox ISO'sunu sıfırdan nasıl derleyeceğinizi adım adım anlatır.
 
 > **Not:** Bu proje Archiso tabanlıdır. Derleme **temiz bir Arch Linux** ortamında (fiziksel, VM veya container/chroot) yapılmalıdır. Debian/Ubuntu üzerinde doğrudan derlenmez.
 

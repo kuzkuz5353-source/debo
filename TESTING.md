@@ -1,6 +1,6 @@
 # ✅ Hiroki OS Kalite Güvencesi ve Test Kontrol Listesi
 
-Sakura 1.0 için 21 test senaryosu. Her biri ISO derleme sonrası fiziksel/VM ortamında doğrulanmalı.
+Neox 1.0 için 21 test senaryosu. Her biri ISO derleme sonrası fiziksel/VM ortamında doğrulanmalı.
 
 ---
 
@@ -44,11 +44,11 @@ Sakura 1.0 için 21 test senaryosu. Her biri ISO derleme sonrası fiziksel/VM or
 ## Kurulum Sonrası
 
 - [ ] **11. Kurulum sonrası sistem boot ediyor mu**
-  - Yeniden başlat → GRUB Hiroki temalı mı? Plymouth sakura animasyonu görünüyor mu?
+  - Yeniden başlat → GRUB Hiroki temalı mı? Plymouth neox animasyonu görünüyor mu?
 - [ ] **12. Seçilen masaüstü ortamı doğru kurulmuş mu**
   - `pacman -Q | grep xfce` / `plasma-meta` / `gnome` vb. Seçilen DE'nin paketleri ve `cat /etc/hiroki/selected-de` eşleşiyor mu?
 - [ ] **13. Hiroki teması düzgün uygulanmış mı**
-  - GTK `Hiroki-Dark`, ikon `Hiroki-Icons`, duvar kağıdı `sakura-gradient`, terminalde Hiroki ASCII (fastfetch/neofetch), GRUB tema `/boot/grub/grub.cfg` içinde `GRUB_THEME` doğru mu?
+  - GTK `Hiroki-Dark`, ikon `Hiroki-Icons`, duvar kağıdı `neox-gradient`, terminalde Hiroki ASCII (fastfetch/neofetch), GRUB tema `/boot/grub/grub.cfg` içinde `GRUB_THEME` doğru mu?
 - [ ] **14. Ses çalışıyor mu**
   - `pavucontrol` → PipeWire + WirePlumber aktif mi? Hoparlör testi: `speaker-test -c 2 -t wav`
 - [ ] **15. Ağ bağlantısı çalışıyor mu**
@@ -75,6 +75,23 @@ Sakura 1.0 için 21 test senaryosu. Her biri ISO derleme sonrası fiziksel/VM or
   - VMware Workstation/Player → EFI, 2 GB RAM → boot ve kurulum?
 - [ ] **21. Gerçek donanımda çalışıyor mu**
   - Fiziksel laptop/desktop (Intel/AMD/NVIDIA) → Wi-Fi, ses, GPU (Mesa/NVIDIA), yazıcı (CUPS) çalışıyor mu? `hiroki-driver-manager` eksik sürücüyü buluyor mu?
+
+## Yeni Özellikler (Neox)
+
+- [ ] **22. Btrfs Asistanı otomatik snapshot alıyor mu**
+  - Btrfs kurulumda bir paket kurup/kaldırıp `timeshift --list` çıktısında yeni bir snapshot oluştuğu görülüyor mu? (`/etc/pacman.d/hooks/95-hiroki-btrfs-assistant.hook` PreTransaction'da çalışıyor mu?)
+- [ ] **23. GRUB'dan snapshot ile açılış yapılabiliyor mu**
+  - `grub-btrfsd` servisi aktif mi? Yeniden başlatınca GRUB'da "Hiroki OS Neox Snapshots" alt menüsü görünüyor mu, seçilen snapshot ile açılış yapılabiliyor mu?
+- [ ] **24. Tek tıkla DNS değiştirme çalışıyor mu**
+  - `hiroki-network-manager` içinden bir sağlayıcı seçilip uygulandığında `resolvectl status` / `nmcli` çıktısında DNS değişti mi?
+- [ ] **25. İzole internet sürücüsü çalışıyor mu**
+  - "İzole Ağı Etkinleştir" sonrası `ip netns list` içinde `hiroki-isolated-net` görünüyor mu? `ip netns exec hiroki-isolated-net ping 1.1.1.1` başarılı mı?
+- [ ] **26. Kernel Manager ile çekirdek kurulumu çalışıyor mu**
+  - `hiroki-kernel-manager` üzerinden `linux-zen` seçilip kurulduğunda paket kuruluyor ve `grub-mkconfig` sonrası GRUB menüsünde yeni giriş beliriyor mu?
+- [ ] **27. Hello Update eksik bileşenleri doğru tespit ediyor mu**
+  - `hiroki-hello-update --scan` çıktısı, kurulu olmayan `lib32-*`/`gamemode`/`mangohud` gibi paketleri listeliyor mu? GUI'den "Eksikleri Tek Tıkla Kur" sonrası liste boşalıyor mu?
+- [ ] **28. Marka adı her yerde "Hiroki OS Neox" mı**
+  - `/etc/os-release`, GRUB teması, Plymouth, SDDM, `hiroki-welcome`, kurulum sihirbazı ekranlarının hiçbirinde "Sakura" ibaresi kalmamış mı? Kurulum sonrası hedef sistemde de aynı doğrulama yapılmış mı?
 
 ---
 

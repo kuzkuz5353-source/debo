@@ -105,18 +105,18 @@ rm -f /var/lib/hiroki/first-boot-done 2>/dev/null || true
 if ! grep -q "Hiroki OS" /etc/os-release 2>/dev/null; then
     cat > /etc/os-release <<'EOS'
 NAME="Hiroki OS"
-PRETTY_NAME="Hiroki OS 1.0 (Sakura)"
+PRETTY_NAME="Hiroki OS 1.0 (Neox)"
 ID=hiroki
 ID_LIKE=arch
 BUILD_ID=rolling
-VERSION="1.0 Sakura"
+VERSION="1.0 Neox"
 VERSION_ID="1.0"
-VERSION_CODENAME=sakura
+VERSION_CODENAME=neox
 HOME_URL="https://hiroki-os.org"
 DOCUMENTATION_URL="https://wiki.hiroki-os.org"
 SUPPORT_URL="https://hiroki-os.org/support"
 BUG_REPORT_URL="https://github.com/hiroki-os/hiroki-os/issues"
-LOGO=linux
+LOGO=hiroki-neox-logo
 ANSI_COLOR="0;35"
 EOS
 fi

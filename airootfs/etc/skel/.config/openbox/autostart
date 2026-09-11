@@ -16,7 +16,7 @@ picom --config /etc/picom.conf --daemon 2>/dev/null || picom --daemon 2>/dev/nul
 tint2 -c ~/.config/tint2/tint2rc &
 
 # Wallpaper
-feh --no-fehbg --bg-fill /usr/share/hiroki/wallpapers/sakura-gradient.jpg &
+feh --no-fehbg --bg-fill /usr/share/hiroki/wallpapers/neox-gradient.jpg &
 
 # Launcher
 # rofi -show drun -show-icons &

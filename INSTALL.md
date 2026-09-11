@@ -1,4 +1,4 @@
-# 💿 Hiroki OS Kurulum Rehberi — Sakura 1.0
+# 💿 Hiroki OS Kurulum Rehberi — Neox 1.0
 
 Bu belge BIOS ve UEFI, disk bölümleme, dual-boot ve kurulum sonrası adımları kapsar.
 
@@ -127,7 +127,7 @@ Her ikisi de Hiroki profilinde tanımlı (`profiledef.sh` → `bootmodes`).
 ## 7. Kurulum Sonrası İlk Açılış
 
 1. GRUB → Hiroki temalı menü (10 sn)
-2. Plymouth sakura animasyonu (varsa)
+2. Plymouth neox animasyonu (varsa)
 3. Display Manager:
    - XFCE/Cinnamon/MATE/Budgie/LXQt/Openbox → **LightDM** (Hiroki GTK greeter)
    - KDE → **SDDM** (Hiroki teması)

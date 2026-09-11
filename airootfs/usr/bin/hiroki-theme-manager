@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Hiroki OS - Tema Yöneticisi
-# Sakura 1.0 - GTK3
+# Neox 1.0 - GTK3
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk, GLib
@@ -81,7 +81,7 @@ class HirokiThemeManager(Gtk.Window):
         flow.set_max_children_per_line(3)
         flow.set_selection_mode(Gtk.SelectionMode.SINGLE)
         wallpapers = [
-            ("sakura-gradient", "Sakura Gradyan (Varsayılan)", "#2D1B69 → #E91E8C"),
+            ("neox-gradient", "Neox Gradyan (Varsayılan)", "#2D1B69 → #E91E8C"),
             ("geometric-waves", "Geometrik Dalgalar", "#00D4AA dalgalar"),
             ("minimal-mountain", "Minimalist Dağ", "Sisli dağlar"),
             ("abstract-neon", "Soyut Neon Işıklar", "Neon çizgiler"),

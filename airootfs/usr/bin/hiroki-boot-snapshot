@@ -3,7 +3,7 @@
 # Ayarlara bakarak snapshot alir
 
 SETTINGS="/etc/hiroki/snapshot-settings.json"
-LOG="/var/log/hiroki-snapshot.log"
+LOG="/var/log/hiroki-btrfs-assistant.log"
 
 log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >> "$LOG"

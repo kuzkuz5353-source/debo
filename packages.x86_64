@@ -1,4 +1,4 @@
-# Hiroki OS 1.0 Sakura - packages.x86_64
+# Hiroki OS 1.0 Neox - packages.x86_64
 # Archiso paket listesi - Kategorilere göre organize edilmiştir
 # Live ISO: Linis WM varsayılan olarak çalışır
 # Diğer DE paketleri installer ile hedef sisteme kurulur
@@ -22,6 +22,8 @@ mtools
 memtest86+
 networkmanager
 network-manager-applet
+iproute2
+iptables-nft
 wireless_tools
 wpa_supplicant
 dialog
@@ -71,6 +73,9 @@ ntfs-3g
 # exfat-utils kaldırıldı: exfatprogs ile çakışır (Conflicts), FUSE tabanlı eski sürüm
 exfatprogs
 btrfs-progs
+grub-btrfs
+inotify-tools
+snapper
 xfsprogs
 f2fs-tools
 gvfs

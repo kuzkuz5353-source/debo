@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Hiroki OS Btrfs Asistanı
+Name[tr]=Hiroki OS Btrfs Asistanı
+Comment=Otomatik anlık görüntü (snapshot) alma ve GRUB üzerinden sistem geri yükleme
+Comment[tr]=Otomatik anlık görüntü (snapshot) alma ve GRUB üzerinden sistem geri yükleme
+Exec=hiroki-btrfs-assistant
+Icon=drive-harddisk
+Terminal=false
+Categories=System;
+StartupNotify=true

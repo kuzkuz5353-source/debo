@@ -8,7 +8,7 @@ master_ratio = 45
 terminal = "alacritty"
 file_manager = "pcmanfm"
 launcher = "rofi -show drun -show-icons"
-wallpaper = "/usr/share/linis/wallpapers/sakura-gradient.jpg"
+wallpaper = "/usr/share/linis/wallpapers/neox-gradient.jpg"
 
 [gaps]
 outer = 6

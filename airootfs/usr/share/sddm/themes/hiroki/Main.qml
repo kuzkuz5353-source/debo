@@ -5,7 +5,7 @@ Rectangle {
     width: 1920; height: 1080
     color: "#0D0D1A"
     Image {
-        source: "file:///usr/share/hiroki/wallpapers/sakura-gradient.jpg"
+        source: "file:///usr/share/hiroki/wallpapers/neox-gradient.jpg"
         anchors.fill: parent
         fillMode: Image.PreserveAspectCrop
         opacity: 0.9
@@ -13,8 +13,8 @@ Rectangle {
     Column {
         anchors.centerIn: parent
         spacing: 20
-        Image { source: "hiroki-logo.png"; width: 260; height: 80; fillMode: Image.PreserveAspectFit; anchors.horizontalCenter: parent.horizontalCenter }
-        Text { text: "Hiroki OS 1.0 Sakura"; color: "#EAEAEA"; font.pixelSize: 22; font.bold: true; anchors.horizontalCenter: parent.horizontalCenter }
+        Image { source: "hiroki-neox-logo.png"; width: 120; height: 120; fillMode: Image.PreserveAspectFit; anchors.horizontalCenter: parent.horizontalCenter }
+        Text { text: "Hiroki OS Neox"; color: "#EAEAEA"; font.pixelSize: 22; font.bold: true; anchors.horizontalCenter: parent.horizontalCenter }
         TextField { id: name; width: 260; placeholderText: "Kullanıcı adı"; anchors.horizontalCenter: parent.horizontalCenter }
         PasswordField { id: password; width: 260; placeholderText: "Parola"; anchors.horizontalCenter: parent.horizontalCenter }
         Button { text: "Giriş Yap"; width: 260; anchors.horizontalCenter: parent.horizontalCenter; onClicked: sddm.login(name.text, password.text, session.index) }

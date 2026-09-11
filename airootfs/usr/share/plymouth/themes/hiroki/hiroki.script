@@ -1,10 +1,10 @@
-// Hiroki OS - Plymouth Script - Sakura
-// Koyu arkaplan (#0D0D1A) üzerine Hiroki logosu ve sakura animasyonu
+// Hiroki OS - Plymouth Script - Neox
+// Koyu arkaplan (#0D0D1A) üzerine Hiroki logosu ve neox animasyonu
 
 Window.SetBackgroundTopColor(0.05, 0.05, 0.10); // #0D0D1A
 Window.SetBackgroundBottomColor(0.17, 0.10, 0.41); // #2D1B69
 
-hiroki_image = Image("hiroki-logo.png");
+hiroki_image = Image("hiroki-neox-logo.png");
 hiroki_sprite = Sprite(hiroki_image);
 hiroki_sprite.SetX(Window.GetWidth() / 2 - hiroki_image.GetWidth() / 2);
 hiroki_sprite.SetY(Window.GetHeight() / 2 - hiroki_image.GetHeight() / 2 - 50);
@@ -20,7 +20,7 @@ progress = 0;
 fun refresh_callback() {
     progress++;
     if (progress > 5) progress = 0;
-    // Pembe noktalar sırayla belirir (sakura yaprakları)
+    // Pembe noktalar sırayla belirir (neox yaprakları)
 }
 
 Plymouth.SetRefreshFunction(refresh_callback);

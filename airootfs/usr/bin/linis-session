@@ -29,7 +29,7 @@ fi
 if [ -z "$wall" ]; then
   for cand in \
     "$HOME/.config/linis/wallpaper" \
-    /usr/share/linis/wallpapers/sakura-gradient.jpg \
+    /usr/share/linis/wallpapers/neox-gradient.jpg \
     /usr/share/linis/wallpapers/*.jpg \
     /usr/share/linis/wallpapers/*.png ; do
     [ -f "$cand" ] && wall="$cand" && break

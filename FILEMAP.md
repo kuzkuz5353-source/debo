@@ -29,7 +29,7 @@ hiroki-os/
     │   ├── locale.conf                  # LANG=tr_TR.UTF-8
     │   ├── locale.gen                   # tr,en,ja,de,fr...
     │   ├── vconsole.conf                # KEYMAP=trq
-    │   ├── os-release                   # Hiroki OS 1.0 Sakura
+    │   ├── os-release                   # Hiroki OS 1.0 Neox
     │   ├── lsb-release
     │   ├── pacman.d/mirrorlist
     │   ├── sudoers.d/10-hiroki-live
@@ -37,7 +37,7 @@ hiroki-os/
     │   ├── lightdm/lightdm-gtk-greeter.conf
     │   ├── skel/
     │   │   ├── .bashrc                  # Hiroki prompt + fastfetch
-    │   │   ├── Pictures/wallpaper.jpg   # sakura-gradient
+    │   │   ├── Pictures/wallpaper.jpg   # neox-gradient
     │   │   └── .config/
     │   │       ├── autostart/hiroki-welcome.desktop
     │   │       ├── gtk-3.0/{settings.ini,gtk.css}
@@ -92,8 +92,11 @@ hiroki-os/
     │   │   ├── hiroki-welcome           # Wrapper → Python GTK
     │   │   ├── hiroki-theme-manager     # Python GTK
     │   │   ├── hiroki-update            # Python GTK + VTE
-    │   │   ├── hiroki-snapshot          # Python GTK
+    │   │   ├── hiroki-btrfs-assistant          # PyQt6 - otomatik snapshot + GRUB restore
     │   │   ├── hiroki-driver-manager    # Python GTK
+    │   │   ├── hiroki-network-manager   # PyQt6 - tek tıkla DNS + izole ağ
+    │   │   ├── hiroki-kernel-manager    # PyQt6 - oyun çekirdeği yöneticisi
+    │   │   ├── hiroki-hello-update      # PyQt6 - oyun kütüphane/sürücü otomasyonu
     │   │   └── hiroki-live-setup        # Bash - live hazırlık
     │   ├── share/
     │   │   ├── hiroki/

@@ -1,5 +1,5 @@
 # Hiroki OS - .bashrc
-# Sakura 1.0 - Hiroki renkleri ve karşılama
+# Neox 1.0 - Hiroki renkleri ve karşılama
 
 # Eğer interaktif değilse çık
 [[ $- != *i* ]] && return

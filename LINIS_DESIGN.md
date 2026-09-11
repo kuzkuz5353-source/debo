@@ -243,7 +243,7 @@ linis (ana process)
 ## 8. Duvar Kağıdı
 
 - `nitrogen` veya `feh` ile ayarlanır
-- Varsayılan: `sakura-gradient.jpg` (Hiroki duvar kağıdı)
+- Varsayılan: `neox-gradient.jpg` (Hiroki duvar kağıdı)
 - Tüm workspace'ler için aynı duvar kağıdı
 - Panel/bar üzerinde blur efekti uygulanır
 

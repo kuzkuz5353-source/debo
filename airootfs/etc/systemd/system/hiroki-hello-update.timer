@@ -1,0 +1,11 @@
+[Unit]
+Description=Hiroki OS Hello Update - açılıştan sonra ve günlük tarama
+
+[Timer]
+OnBootSec=3min
+OnUnitActiveSec=1d
+Persistent=true
+Unit=hiroki-hello-update.service
+
+[Install]
+WantedBy=timers.target

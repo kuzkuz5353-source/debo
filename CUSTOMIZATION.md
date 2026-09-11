@@ -1,6 +1,6 @@
 # 🎨 Hiroki OS Özelleştirme Rehberi
 
-Sakura temasını, masaüstü ortamını ve kendi temanı nasıl oluşturacağını anlatır.
+Neox temasını, masaüstü ortamını ve kendi temanı nasıl oluşturacağını anlatır.
 
 ---
 

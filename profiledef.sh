@@ -2,13 +2,13 @@
 # shellcheck disable=SC2034
 
 # Hiroki OS - profiledef.sh
-# Archiso profil tanımlaması - Sakura 1.0
+# Archiso profil tanımlaması - Neox 1.0
 # https://wiki.archlinux.org/title/Archiso
 
 iso_name="hiroki-os"
 iso_label="HIROKI_OS"
 iso_publisher="Hiroki OS Project <https://hiroki-os.org>"
-iso_application="Hiroki OS 1.0 Sakura"
+iso_application="Hiroki OS 1.0 Neox"
 iso_version="1.0"
 install_dir="arch"
 buildmodes=('iso')
@@ -26,7 +26,7 @@ file_permissions=(
   ["/usr/bin/hiroki-welcome"]="0:0:755"
   ["/usr/bin/hiroki-theme-manager"]="0:0:755"
   ["/usr/bin/hiroki-update"]="0:0:755"
-  ["/usr/bin/hiroki-snapshot"]="0:0:755"
+  ["/usr/bin/hiroki-btrfs-assistant"]="0:0:755"
   ["/usr/bin/hiroki-driver-manager"]="0:0:755"
   ["/usr/share/hiroki/de-selector/hiroki-de-selector.py"]="0:0:755"
   ["/usr/share/hiroki-welcome/hiroki-welcome.py"]="0:0:755"
@@ -78,5 +78,17 @@ file_permissions=(
   ["/usr/share/neox-desktop/scripts/uninstall.sh"]="0:0:755"
   ["/usr/share/neox-desktop/scripts/neox-session.sh"]="0:0:755"
   ["/usr/share/neox-desktop/scripts/neox-autostart.sh"]="0:0:755"
+  ["/usr/bin/hiroki-network-manager"]="0:0:755"
+  ["/usr/bin/hiroki-kernel-manager"]="0:0:755"
+  ["/usr/bin/hiroki-hello-update"]="0:0:755"
+  ["/usr/bin/hiroki-pre-update-snapshot"]="0:0:755"
+  ["/usr/bin/hiroki-boot-snapshot"]="0:0:755"
+  ["/usr/share/applications/hiroki-btrfs-assistant.desktop"]="0:0:644"
+  ["/usr/share/applications/hiroki-network-manager.desktop"]="0:0:644"
+  ["/usr/share/applications/hiroki-kernel-manager.desktop"]="0:0:644"
+  ["/usr/share/applications/hiroki-hello-update.desktop"]="0:0:644"
+  ["/etc/systemd/system/hiroki-hello-update.service"]="0:0:644"
+  ["/etc/systemd/system/hiroki-hello-update.timer"]="0:0:644"
+  ["/etc/pacman.d/hooks/95-hiroki-btrfs-assistant.hook"]="0:0:644"
   ["/etc/sudoers.d/10-live"]="0:0:0440"
 )

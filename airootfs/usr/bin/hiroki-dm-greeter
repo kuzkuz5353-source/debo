@@ -140,7 +140,7 @@ class HirokiGreeter(Gtk.Window):
         title.set_markup('<span size="x-large" weight="bold" foreground="#EAEAEA">🌸 Hiroki OS</span>')
         content.pack_start(title, False, False, 0)
         sub = Gtk.Label()
-        sub.set_markup('<span size="medium" foreground="#A0A0B8">Sakura 1.0 — Oturumunu seç ve giriş yap</span>')
+        sub.set_markup('<span size="medium" foreground="#A0A0B8">Neox 1.0 — Oturumunu seç ve giriş yap</span>')
         content.pack_start(sub, False, False, 0)
 
         # Kullanıcı adı

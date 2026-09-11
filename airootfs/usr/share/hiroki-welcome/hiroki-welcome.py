@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Hiroki OS - Hoş Geldiniz Uygulaması
-Sakura 1.0 - hiroki-welcome
+Neox 1.0 - hiroki-welcome
 Python + GTK3
 Live oturum ve kurulum sonrası ilk açılış için iki mod destekler.
 """
@@ -82,10 +82,10 @@ class HirokiWelcome(Gtk.Window):
         text_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
         if self.live:
             title = "Hiroki OS'a Hoş Geldiniz"
-            sub = "Sakura 1.0  •  Arch tabanlı, sakura gibi zarif"
+            sub = "Neox 1.0  •  Arch tabanlı, neox gibi zarif"
         else:
             title = "Hiroki OS'unuz Hazır! 🎉"
-            sub = "Sakura 1.0 başarıyla kuruldu  •  Keyfini çıkarın"
+            sub = "Neox 1.0 başarıyla kuruldu  •  Keyfini çıkarın"
         t1 = Gtk.Label()
         t1.set_markup(f'<span class="title" color="white">{title}</span>')
         t1.set_halign(Gtk.Align.START)
@@ -99,7 +99,7 @@ class HirokiWelcome(Gtk.Window):
         hero.pack_start(text_box, True, True, 0)
         # Sağda sürüm badge
         ver = Gtk.Label()
-        ver.set_markup('<span background="#00D4AA" color="#0D0D1A" weight="bold" size="9000">  v1.0 Sakura  </span>')
+        ver.set_markup('<span background="#00D4AA" color="#0D0D1A" weight="bold" size="9000">  v1.0 Neox  </span>')
         hero.pack_end(ver, False, False, 0)
         main.pack_start(hero, False, False, 0)
 
@@ -216,7 +216,7 @@ class HirokiWelcome(Gtk.Window):
                 {
                     "icon": "ℹ️",
                     "title": "Hiroki OS Hakkında",
-                    "desc": "Sakura 1.0 yenilikleri, renk paleti, tema sistemi ve felsefemizi keşfedin.",
+                    "desc": "Neox 1.0 yenilikleri, renk paleti, tema sistemi ve felsefemizi keşfedin.",
                     "btn": "Hakkında",
                     "action": self.on_about,
                     "primary": False,
@@ -250,10 +250,34 @@ class HirokiWelcome(Gtk.Window):
                 },
                 {
                     "icon": "💾",
-                    "title": "Sistem Yedeği",
-                    "desc": "Btrfs anlık görüntüleri ve Timeshift ile sisteminizi güvenceye alın.",
-                    "btn": "Yedek Oluştur",
-                    "action": lambda w: run_cmd("/usr/bin/hiroki-snapshot &"),
+                    "title": "Btrfs Asistanı",
+                    "desc": "Her kurulum/güncelleme öncesi otomatik snapshot alır; GRUB'dan tek tıkla geri yükleyin.",
+                    "btn": "Btrfs Asistanı",
+                    "action": lambda w: run_cmd("/usr/bin/hiroki-btrfs-assistant &"),
+                    "primary": False,
+                },
+                {
+                    "icon": "🌐",
+                    "title": "Ağ & DNS Yöneticisi",
+                    "desc": "Tek tıkla DNS değiştirin veya izole internet sürücüsünü etkinleştirin.",
+                    "btn": "Ağ Yöneticisi",
+                    "action": lambda w: run_cmd("/usr/bin/hiroki-network-manager &"),
+                    "primary": False,
+                },
+                {
+                    "icon": "🐧",
+                    "title": "Kernel Manager",
+                    "desc": "Oyun için optimize edilmiş çekirdekleri listeleyin, indirin ve tek tıkla kurun.",
+                    "btn": "Kernel Manager",
+                    "action": lambda w: run_cmd("/usr/bin/hiroki-kernel-manager &"),
+                    "primary": False,
+                },
+                {
+                    "icon": "🎮",
+                    "title": "Hello Update",
+                    "desc": "Oyunlar için eksik kütüphane/sürücüleri otomatik tespit edip tek tıkla kurar.",
+                    "btn": "Hello Update",
+                    "action": lambda w: run_cmd("/usr/bin/hiroki-hello-update &"),
                     "primary": False,
                 },
             ]
@@ -336,7 +360,7 @@ class HirokiWelcome(Gtk.Window):
             flags=0,
             message_type=Gtk.MessageType.INFO,
             buttons=Gtk.ButtonsType.OK,
-            text="Hiroki OS 1.0 Sakura 🌸"
+            text="Hiroki OS 1.0 Neox 🌸"
         )
         dialog.format_secondary_text(
             "Arch Linux tabanlı, Calamares yükleyicili modern dağıtım.\n\n"

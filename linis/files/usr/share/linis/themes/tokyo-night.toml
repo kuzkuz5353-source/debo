@@ -47,4 +47,4 @@ master_ratio = 45
 terminal = "xfce4-terminal"
 file_manager = "thunar"
 launcher = "linis-launch"
-wallpaper = "/usr/share/linis/wallpapers/sakura-gradient.png"
+wallpaper = "/usr/share/linis/wallpapers/neox-gradient.png"
