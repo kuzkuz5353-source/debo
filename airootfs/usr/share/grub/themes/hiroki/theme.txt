@@ -1,0 +1,80 @@
+# Hiroki OS - GRUB Tema
+# Neox 1.0 - Koyu arkaplan, Hiroki logosu, özel renkler
+
+# Genel
+desktop-image: "background.png"
+desktop-color: "#0D0D1A"
+title-text: ""
+title-color: "#EAEAEA"
+title-font: "Inter Regular 16"
+message-color: "#A0A0B8"
+message-bg-color: "#1A1A2E"
+message-font: "Inter Regular 12"
+terminal-font: "Terminus 12"
+terminal-box: "terminal_box_c.png"
+
+# Boot menü
++ boot_menu {
+  left = 25%
+  top = 35%
+  width = 50%
+  height = 40%
+  item_height = 28
+  item_spacing = 4
+  item_color = "#EAEAEA"
+  selected_item_color = "#FFFFFF"
+  selected_item_pixmap_style = "selected_c.png"
+  item_pixmap_style = "item_c.png"
+  item_font = "Inter Regular 14"
+  selected_item_font = "Inter Bold 14"
+  align = center
+}
+
+# Hiroki OS Neox logosu (üst ortada)
++ hbox {
+  left = 38%
+  top = 10%
+  width = 24%
+  height = 14%
+  align = center
+  + image {
+    file = "hiroki-neox-logo.png"
+    width = 90
+    height = 90
+  }
+}
+
+# Alt bilgi
++ label {
+  left = 0
+  top = 92%
+  width = 100%
+  align = center
+  text = "Hiroki OS Neox  •  hiroki-os.org  •  Btrfs Asistanı için 'b' tuşuna basın"
+  color = "#A0A0B8"
+  font = "Inter Regular 10"
+}
+
+# Versiyon
++ label {
+  left = 85%
+  top = 5%
+  width = 14%
+  align = right
+  text = "Neox 1.0"
+  color = "#FF8C00"
+  font = "Inter Bold 10"
+}
+
+# Zamanlayıcı
++ label {
+  id = "__timeout__"
+  left = 50%
+  top = 80%
+  width = 100
+  height = 20
+  align = center
+  text = ""
+  color = "#E91E8C"
+  font = "Inter Regular 10"
+}

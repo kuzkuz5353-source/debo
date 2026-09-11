@@ -1,0 +1,12 @@
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Operation = Remove
+Type = Package
+Target = *
+
+[Action]
+Description = Hiroki OS Btrfs Asistanı: paket işleminden önce otomatik anlık görüntü (snapshot) alınıyor...
+When = PreTransaction
+Exec = /usr/bin/hiroki-btrfs-assistant --auto-snapshot --reason "pacman islemi"
+NeedsTargets

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Hiroki OS Hello Update
+Name[tr]=Hiroki OS Hello Update
+Comment=Oyunlar için gerekli eksik kütüphane ve sürücüleri otomatik tespit edip kurar
+Comment[tr]=Oyunlar için gerekli eksik kütüphane ve sürücüleri otomatik tespit edip kurar
+Exec=hiroki-hello-update
+Icon=applications-games
+Terminal=false
+Categories=System;Game;Settings;
+StartupNotify=true

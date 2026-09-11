@@ -1,0 +1,314 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""Hiroki OS Hello Update
+
+Oyunların sorunsuz ve stabil çalışması için gereken tüm kütüphaneleri,
+sürücüleri ve yardımcı programları otomatik olarak tespit eder ve
+eksik olanları tek tıkla (veya tamamen arka planda) kurar.
+
+Kontrol edilen alanlar:
+  - GPU sürücüleri (NVIDIA / AMD / Intel, Vulkan ICD'leri)
+  - 32-bit uyumluluk kütüphaneleri (lib32-*, multilib)
+  - Wine / Proton bağımlılıkları
+  - Ses (PipeWire) ve giriş aygıtı (gamepad) kütüphaneleri
+  - Performans yardımcıları (gamemode, mangohud, vulkan-tools)
+
+Kullanım:
+  hiroki-hello-update            -> GUI ile tarama + onaylı kurulum
+  hiroki-hello-update --scan     -> Sadece eksikleri JSON olarak yazdır (CLI)
+  hiroki-hello-update --auto     -> Arka planda sessizce eksikleri kurar (systemd servisi için)
+"""
+
+import sys
+import os
+import json
+import subprocess
+import shutil
+from datetime import datetime
+
+LOG_FILE = "/var/log/hiroki-hello-update.log"
+
+# (paket_adi, aciklama, kategori)
+GAME_ESSENTIALS = [
+    ("lib32-mesa", "32-bit grafik sürücüsü uyumluluğu (Mesa)", "Grafik"),
+    ("vulkan-icd-loader", "Vulkan API yükleyicisi", "Grafik"),
+    ("lib32-vulkan-icd-loader", "32-bit Vulkan API yükleyicisi", "Grafik"),
+    ("vulkan-tools", "Vulkan tanılama araçları", "Grafik"),
+    ("lib32-vulkan-radeon", "32-bit AMD Vulkan sürücüsü", "Grafik (AMD)"),
+    ("lib32-vulkan-intel", "32-bit Intel Vulkan sürücüsü", "Grafik (Intel)"),
+    ("gamemode", "Oyun sırasında CPU/GPU performans modu", "Performans"),
+    ("lib32-gamemode", "32-bit GameMode desteği", "Performans"),
+    ("mangohud", "Oyun içi FPS / donanım göstergesi", "Performans"),
+    ("lib32-mangohud", "32-bit MangoHud desteği", "Performans"),
+    ("wine", "Windows oyunlarını çalıştırma katmanı", "Uyumluluk"),
+    ("winetricks", "Wine için ek kütüphane kurulum aracı", "Uyumluluk"),
+    ("lib32-alsa-plugins", "32-bit ses eklentileri", "Ses"),
+    ("lib32-libpulse", "32-bit PulseAudio uyumluluğu", "Ses"),
+    ("sdl2", "Oyun giriş/ses/görüntü kütüphanesi", "Girdi"),
+    ("lib32-sdl2", "32-bit SDL2 desteği", "Girdi"),
+    ("lib32-gcc-libs", "32-bit C++ çalışma zamanı kütüphaneleri", "Sistem"),
+    ("lib32-openal", "32-bit OpenAL ses kütüphanesi", "Ses"),
+    ("gamescope", "Oyunlar için mikro birleştirici (compositor)", "Performans"),
+    ("libva-mesa-driver", "Video hızlandırma (VA-API)", "Grafik"),
+    ("lib32-libva-mesa-driver", "32-bit video hızlandırma", "Grafik"),
+]
+
+# GPU'ya özel öneriler dinamik olarak tespit edilir
+NVIDIA_PKGS = [("nvidia-dkms", "NVIDIA çekirdek modülü (DKMS)", "Grafik (NVIDIA)"),
+               ("nvidia-utils", "NVIDIA yardımcı programları", "Grafik (NVIDIA)"),
+               ("lib32-nvidia-utils", "32-bit NVIDIA uyumluluğu", "Grafik (NVIDIA)")]
+
+
+def log(msg):
+    try:
+        os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
+        with open(LOG_FILE, "a") as f:
+            f.write(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {msg}\n")
+    except Exception:
+        pass
+
+
+def run_cmd(cmd, timeout=15):
+    try:
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+        return r.stdout.strip(), r.stderr.strip(), r.returncode
+    except Exception as e:
+        return "", str(e), -1
+
+
+def is_installed(pkg):
+    _, _, code = run_cmd(["pacman", "-Qi", pkg], timeout=10)
+    return code == 0
+
+
+def detect_gpu_vendor():
+    out, _, _ = run_cmd(["lspci"], timeout=10)
+    out_lower = out.lower()
+    if "nvidia" in out_lower:
+        return "nvidia"
+    if "amd" in out_lower or "radeon" in out_lower:
+        return "amd"
+    if "intel" in out_lower and ("vga" in out_lower or "display" in out_lower):
+        return "intel"
+    return "unknown"
+
+
+def scan_missing():
+    catalog = list(GAME_ESSENTIALS)
+    if detect_gpu_vendor() == "nvidia":
+        catalog += NVIDIA_PKGS
+    missing = []
+    for pkg, desc, cat in catalog:
+        if not is_installed(pkg):
+            missing.append({"pkg": pkg, "desc": desc, "category": cat})
+    return missing
+
+
+def install_packages(pkgs, use_pkexec=True):
+    if not pkgs:
+        return True, "Kurulacak eksik paket yok."
+    cmd_str = "pacman -Sy --needed --noconfirm " + " ".join(pkgs)
+    if use_pkexec:
+        result = subprocess.run(["pkexec", "bash", "-c", cmd_str], capture_output=True, text=True, timeout=1800)
+    else:
+        result = subprocess.run(["bash", "-c", cmd_str], capture_output=True, text=True, timeout=1800)
+    if result.returncode == 0:
+        log(f"Kuruldu: {', '.join(pkgs)}")
+        return True, f"{len(pkgs)} bileşen başarıyla kuruldu."
+    log(f"Kurulum hatası: {result.stderr}")
+    return False, result.stderr.strip() or "Kurulum başarısız oldu."
+
+
+def run_cli_auto():
+    """systemd servisi tarafından arka planda sessizce çağrılır."""
+    missing = scan_missing()
+    if not missing:
+        log("Eksik bileşen yok, sistem oyun için hazır.")
+        return 0
+    pkgs = [m["pkg"] for m in missing]
+    log(f"{len(pkgs)} eksik bileşen tespit edildi, arka planda kuruluyor: {', '.join(pkgs)}")
+    ok, msg = install_packages(pkgs, use_pkexec=False)
+    log(msg)
+    return 0 if ok else 1
+
+
+def run_cli_scan():
+    print(json.dumps(scan_missing(), ensure_ascii=False, indent=2))
+    return 0
+
+
+def run_gui():
+    try:
+        from PyQt6.QtWidgets import (
+            QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
+            QLabel, QPushButton, QListWidget, QListWidgetItem, QMessageBox,
+            QProgressBar
+        )
+        from PyQt6.QtCore import Qt, QThread, pyqtSignal
+    except ImportError:
+        print("Hata: PyQt6 bulunamadi. 'pacman -S python-pyqt6' ile kurun.")
+        return 1
+
+    ACCENT = "#FF6A00"
+    BG_MAIN = "#111111"
+    BG_CARD = "#1a1a1a"
+    TEXT_COLOR = "#e0e0e0"
+    TEXT_DIM = "#888888"
+    BORDER_COLOR = "#333333"
+    SUCCESS = "#4caf50"
+    ERROR = "#f44336"
+
+    class ScanWorker(QThread):
+        done = pyqtSignal(list)
+
+        def run(self):
+            self.done.emit(scan_missing())
+
+    class InstallWorker(QThread):
+        done = pyqtSignal(bool, str)
+
+        def __init__(self, pkgs):
+            super().__init__()
+            self.pkgs = pkgs
+
+        def run(self):
+            ok, msg = install_packages(self.pkgs, use_pkexec=True)
+            self.done.emit(ok, msg)
+
+    class HelloUpdateWindow(QMainWindow):
+        def __init__(self):
+            super().__init__()
+            self.setWindowTitle("Hiroki OS Hello Update")
+            self.setMinimumSize(680, 540)
+            self.missing = []
+            self.scan_worker = None
+            self.install_worker = None
+            self._build_ui()
+            self.on_scan()
+
+        def _build_ui(self):
+            central = QWidget()
+            self.setCentralWidget(central)
+            outer = QVBoxLayout(central)
+            outer.setContentsMargins(20, 20, 20, 20)
+            outer.setSpacing(14)
+
+            title = QLabel("Hiroki OS Hello Update")
+            title.setStyleSheet(f"color: {ACCENT}; font-size: 20px; font-weight: bold;")
+            outer.addWidget(title)
+
+            subtitle = QLabel(
+                "Oyunların stabil çalışması için gereken tüm kütüphane, sürücü ve "
+                "yardımcı programları otomatik tespit eder; eksikleri tek tıkla kurar."
+            )
+            subtitle.setWordWrap(True)
+            subtitle.setStyleSheet(f"color: {TEXT_DIM}; font-size: 12px;")
+            outer.addWidget(subtitle)
+
+            self.list_widget = QListWidget()
+            outer.addWidget(self.list_widget, 1)
+
+            self.progress = QProgressBar()
+            self.progress.setVisible(False)
+            self.progress.setRange(0, 0)
+            outer.addWidget(self.progress)
+
+            self.status_label = QLabel("Taranıyor...")
+            self.status_label.setStyleSheet(f"color: {TEXT_DIM}; font-size: 12px;")
+            outer.addWidget(self.status_label)
+
+            btn_row = QHBoxLayout()
+            self.btn_scan = QPushButton("Yeniden Tara")
+            self.btn_scan.clicked.connect(self.on_scan)
+            btn_row.addWidget(self.btn_scan)
+
+            self.btn_install = QPushButton("Eksikleri Tek Tıkla Kur")
+            self.btn_install.setEnabled(False)
+            self.btn_install.clicked.connect(self.on_install)
+            btn_row.addWidget(self.btn_install)
+
+            btn_row.addStretch()
+            btn_close = QPushButton("Kapat")
+            btn_close.clicked.connect(self.close)
+            btn_row.addWidget(btn_close)
+            outer.addLayout(btn_row)
+
+            self.setStyleSheet(f"""
+                QMainWindow, QWidget {{ background-color: {BG_MAIN}; color: {TEXT_COLOR}; }}
+                QListWidget {{
+                    background-color: {BG_CARD}; border: 1px solid {BORDER_COLOR}; border-radius: 8px;
+                    padding: 6px; font-size: 12px;
+                }}
+                QListWidget::item {{ padding: 8px; }}
+                QPushButton {{
+                    background-color: #1e1e1e; color: {TEXT_COLOR}; border: 1px solid {BORDER_COLOR};
+                    border-radius: 6px; padding: 9px 16px;
+                }}
+                QPushButton:hover {{ background-color: {ACCENT}; color: #1a0800; }}
+                QPushButton:disabled {{ color: {TEXT_DIM}; }}
+            """)
+
+        def on_scan(self):
+            self.status_label.setText("Sistem taranıyor: sürücüler, kütüphaneler, yardımcı programlar...")
+            self.list_widget.clear()
+            self.btn_install.setEnabled(False)
+            self.progress.setVisible(True)
+            self.scan_worker = ScanWorker()
+            self.scan_worker.done.connect(self._on_scan_done)
+            self.scan_worker.start()
+
+        def _on_scan_done(self, missing):
+            self.progress.setVisible(False)
+            self.missing = missing
+            if not missing:
+                self.status_label.setText("✅ Sisteminiz oyun için hazır, eksik bileşen bulunamadı.")
+                self.status_label.setStyleSheet(f"color: {SUCCESS}; font-size: 12px;")
+                return
+            for m in missing:
+                item = QListWidgetItem(f"⛔ {m['pkg']}  —  {m['desc']}  [{m['category']}]")
+                self.list_widget.addItem(item)
+            self.status_label.setText(f"{len(missing)} eksik bileşen bulundu.")
+            self.status_label.setStyleSheet(f"color: {ERROR}; font-size: 12px;")
+            self.btn_install.setEnabled(True)
+
+        def on_install(self):
+            if not self.missing:
+                return
+            pkgs = [m["pkg"] for m in self.missing]
+            self.btn_install.setEnabled(False)
+            self.progress.setVisible(True)
+            self.status_label.setText("Eksik bileşenler kuruluyor, bu işlem birkaç dakika sürebilir...")
+            self.install_worker = InstallWorker(pkgs)
+            self.install_worker.done.connect(self._on_install_done)
+            self.install_worker.start()
+
+        def _on_install_done(self, success, msg):
+            self.progress.setVisible(False)
+            color = SUCCESS if success else ERROR
+            self.status_label.setText(msg)
+            self.status_label.setStyleSheet(f"color: {color}; font-size: 12px;")
+            if success:
+                QMessageBox.information(self, "Hiroki OS Hello Update", msg)
+                self.on_scan()
+            else:
+                QMessageBox.warning(self, "Hata", msg)
+                self.btn_install.setEnabled(True)
+
+    app = QApplication(sys.argv)
+    app.setApplicationName("Hiroki OS Hello Update")
+    app.setStyle("Fusion")
+    window = HelloUpdateWindow()
+    window.show()
+    return app.exec()
+
+
+def main():
+    if "--auto" in sys.argv:
+        sys.exit(run_cli_auto())
+    if "--scan" in sys.argv:
+        sys.exit(run_cli_scan())
+    sys.exit(run_gui())
+
+
+if __name__ == "__main__":
+    main()

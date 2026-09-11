@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Hiroki OS Ağ & DNS Yöneticisi
+Name[tr]=Hiroki OS Ağ & DNS Yöneticisi
+Comment=Tek tıkla DNS değiştirme ve izole internet sürücüsü
+Comment[tr]=Tek tıkla DNS değiştirme ve izole internet sürücüsü
+Exec=hiroki-network-manager
+Icon=network-wired
+Terminal=false
+Categories=System;Network;Settings;
+StartupNotify=true
