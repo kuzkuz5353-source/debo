@@ -9,11 +9,11 @@ Neox yaprakları gibi her katkı değerlidir. Teşekkürler!
 ### Hata Bildir (Issue)
 
 - https://github.com/hiroki-os/hiroki-os/issues → **New Issue**
-- Şablon: Başlık, açıklama, adımlar, beklenen/gerçek sonuç, `hiroki-hw-detect` çıktısı, Calamares log (`/var/log/calamares/`)
+- Şablon: Başlık, açıklama, adımlar, beklenen/gerçek sonuç, `hiroki-hw-detect` çıktısı, hiroki-installer log (`/var/log/hiroki-installer/`)
 
 ### Özellik İsteği
 
-- Aynı issue sayfasında **Feature Request** etiketiyle açın; öneri matrisini veya yeni DE'yi tartışalım
+- Aynı issue sayfasında **Feature Request** etiketiyle açın; NEOX masaüstüne veya Hiroki Installer'a yönelik öneriler için tartışalım (Hiroki OS artık tek masaüstü sunar: NEOX)
 
 ### Kod Katkısı (Pull Request)
 
@@ -22,8 +22,8 @@ Neox yaprakları gibi her katkı değerlidir. Teşekkürler!
 3. Değiştir, test et (QEMU/VirtualBox)
 4. Commit: Conventional Commits (`feat:`, `fix:`, `docs:`, `style:`)
    ```
-   feat(de-selector): Hyprland için VRAM kontrolü eklendi
-   fix(calamares): btrfs subvolume compress bayrağı düzeltildi
+   feat(neox): panel için VRAM kontrolü eklendi
+   fix(hiroki-installer): btrfs subvolume compress bayrağı düzeltildi
    ```
 5. Push → GitHub'da **Pull Request** aç, şablonu doldur
 
@@ -32,8 +32,8 @@ Neox yaprakları gibi her katkı değerlidir. Teşekkürler!
 ## 2. Kod Stili
 
 - **Bash:** `shellcheck` temiz, `set -euo pipefail`, shebang `#!/usr/bin/env bash`, fonksiyonlar `snake_case`
-- **Python (GTK):** PEP8, `python -m py_compile`, Türkçe yorumlarda UTF-8, `gi.require_version` doğru
-- **Calamares YAML:** 2 boşluk girinti, resmi Calamares anahtarları (bkz. https://github.com/calamares/calamares)
+- **Python (GTK/PyQt6):** PEP8, `python -m py_compile`, Türkçe yorumlarda UTF-8, `gi.require_version` doğru
+- **NEOX (Hyprland) config:** `neox-desktop/compositor/hyprland.conf` sözdizimi Hyprland resmi wiki ile uyumlu
 - **Archiso:** Resmi Arch Wiki ile uyumlu; paket isimleri `pacman -Si` ile doğrulanmış
 - **Tema CSS:** Renkler sadece Hiroki paleti (`#2D1B69`, `#E91E8C`, `#00D4AA`, `#0D0D1A`, `#1A1A2E`)
 - **Commit mesajı:** Türkçe veya İngilizce, açıklayıcı, tek satır özet + detaylı gövde
@@ -42,13 +42,12 @@ Neox yaprakları gibi her katkı değerlidir. Teşekkürler!
 
 ## 3. Test
 
-PR öncesi kontrol listesi (bkz. README → Kalite Güvencesi, 21 madde):
+PR öncesi kontrol listesi (bkz. TESTING.md):
 
 - [ ] `shellcheck build.sh airootfs/usr/bin/hiroki-*`
-- [ ] `python3 -m py_compile airootfs/usr/share/hiroki-welcome/*.py`
-- [ ] `yamllint airootfs/etc/calamares/**/*.conf` (opsiyonel)
-- [ ] QEMU'da 512 MB, 2 GB, 8 GB RAM ile ayrı test
-- [ ] Calamares tüm adımları geçiyor, kurulum sonrası boot ediyor
+- [ ] `python3 -m py_compile airootfs/usr/share/hiroki-welcome/*.py airootfs/usr/bin/hiroki-installer`
+- [ ] QEMU'da 2 GB, 4 GB, 8 GB RAM ile ayrı test
+- [ ] Hiroki Installer tüm adımları geçiyor, kurulum sonrası NEOX ile boot ediyor
 
 ---
 

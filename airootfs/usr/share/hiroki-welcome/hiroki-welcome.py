@@ -146,8 +146,8 @@ class HirokiWelcome(Gtk.Window):
             hw_inner.pack_start(row("CPU", f"{hw.get('cpu_cores')} çekirdek"), False, False, 0)
             hw_inner.pack_start(row("GPU", hw.get('gpu_vendor','-')), False, False, 0)
             hw_inner.pack_start(row("Disk", f"{hw.get('disk_gb')} GB"), False, False, 0)
-            rec = hw.get('recommended','xfce')
-            hw_inner.pack_start(row("Öneri", rec.upper()), False, False, 0)
+            rec = hw.get('recommended','neox')
+            hw_inner.pack_start(row("Masaüstü", rec.upper()), False, False, 0)
             msg = Gtk.Label()
             msg.set_markup(f'<span color="#A0A0B8" size="8000"><i>{GLib.markup_escape_text(hw.get("message",""))}</i></span>')
             msg.set_line_wrap(True)
@@ -198,19 +198,11 @@ class HirokiWelcome(Gtk.Window):
             # Live mod kartları
             cards = [
                 {
-                    "icon": "🎨",
-                    "title": "Masaüstü Ortamı Seç",
-                    "desc": "Donanımınıza göre önerilen ortamı görün, 10 seçenekten dilediğinizi seçin. Öneririz, asla zorlamayız.",
-                    "btn": "DE Seçiciyi Aç",
-                    "action": lambda w: run_cmd("/usr/bin/hiroki-de-selector &"),
-                    "primary": True,
-                },
-                {
                     "icon": "💿",
                     "title": "Kuruluma Başla",
-                    "desc": "Calamares yükleyici ile diskinize kurun. Btrfs, EFI, Türkçe tam destek.",
-                    "btn": "Calamares'i Başlat",
-                    "action": lambda w: run_cmd("sudo -E calamares &"),
+                    "desc": "Hiroki Installer ile diskinize kurun. Btrfs, EFI, Türkçe tam destek, tek masaüstü: NEOX.",
+                    "btn": "Hiroki Installer'ı Başlat",
+                    "action": lambda w: run_cmd("/usr/bin/hiroki-installer-launch &"),
                     "primary": True,
                 },
                 {
@@ -363,9 +355,9 @@ class HirokiWelcome(Gtk.Window):
             text="Hiroki OS 1.0 Neox 🌸"
         )
         dialog.format_secondary_text(
-            "Arch Linux tabanlı, Calamares yükleyicili modern dağıtım.\n\n"
-            "Felsefe: Donanımını tanı, en uygun masaüstünü öner ama asla zorla.\n"
-            "• 10 masaüstü / WM desteği (XFCE, KDE, GNOME, Cinnamon, MATE, Budgie, LXQt, i3wm, Openbox, Hyprland)\n"
+            "Arch Linux tabanlı, Hiroki Installer'lı modern dağıtım.\n\n"
+            "Felsefe: Tek, özenle bütünleştirilmiş bir masaüstü deneyimi.\n"
+            "• Tek masaüstü: NEOX (Hyprland tabanlı Wayland)\n"
             "• Hiroki-Dark GTK, Hiroki-Icons, 5 duvar kağıdı\n"
             "• Türkçe varsayılan, çok dilli\n"
             "• Renkler: #2D1B69, #E91E8C, #00D4AA\n\n"

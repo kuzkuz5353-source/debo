@@ -8,7 +8,7 @@ configuration {
     display-run: "  Run";
     display-window: "  Windows";
     drun-display-format: "{name}";
-    terminal: "alacritty";
+    terminal: "foot";
 }
 
 * {

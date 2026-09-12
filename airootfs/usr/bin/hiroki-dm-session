@@ -1,15 +1,10 @@
 #!/usr/bin/env bash
 # Hiroki OS - Kullanıcı Oturumu Başlatıcı
-# hiroki-dm-xsession tarafından `su - kullanıcı` ile KULLANICI yetkisiyle çağrılır.
-# Yeni bir X sunucusu AÇMAZ; hiroki-dm'in açtığı mevcut $DISPLAY'e bağlanıp
-# seçilen masaüstü ortamını başlatır.
+# hiroki-dm tarafından `su - kullanıcı` ile KULLANICI yetkisiyle çağrılır.
+# Hiroki OS artık tek masaüstü sunar: NEOX (Hyprland tabanlı, Wayland).
 set -euo pipefail
 
 USER_NAME="${1:-$(id -un)}"
-SESSION="${2:-}"
-if [[ -z "$SESSION" ]]; then
-    SESSION=$(tr -d '[:space:]' < /etc/hiroki/selected-de 2>/dev/null || echo xfce)
-fi
 
 # --- XDG_RUNTIME_DIR (PipeWire / systemd --user için) ---
 if [[ -z "${XDG_RUNTIME_DIR:-}" ]]; then
@@ -24,31 +19,12 @@ export GDK_DISABLE_SANDBOXED_LOADER=1
 # glycin user cache temizle (sandbox crash engelle)
 rm -rf /home/"$USER_NAME"/.cache/glycin 2>/dev/null || true
 
-# --- oturum komutunu belirle (hiroki-dm-xinit ile tutarlı) ---
-start_cmd() {
-    case "$1" in
-        lxqt)            echo "startlxqt" ;;
-        openbox|linis)    echo "openbox-session" ;;
-        xfce|xfce4)      echo "startxfce4" ;;
-        mate)            echo "mate-session" ;;
-        cinnamon)        echo "cinnamon-session" ;;
-        kde|plasma)      echo "startplasma-wayland" ;;
-        gnome)           echo "gnome-session" ;;
-        lxde)            echo "startlxde" ;;
-        i3|i3wm)         echo "i3" ;;
-        budgie)          echo "budgie-session" ;;
-        hyprland)        echo "hyprland" ;;
-        neox)            echo "neox-session" ;;
-        *)               echo "startplasma-wayland" ;;
-    esac
-}
-
-CMD="$(start_cmd "$SESSION")"
+CMD="neox-session"
 
 # --- D-Bus: oturum darphanesi ---
 # Kullanıcı oturumu için bir D-Bus oturum veriyolu garanti et.
 if [[ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ]] && command -v dbus-run-session >/dev/null 2>&1; then
-    # Oturum veriyolunu başlat ve kullanıcı servislerini ayağa kaldır, sonra DE'yi çalıştır.
+    # Oturum veriyolunu başlat ve kullanıcı servislerini ayağa kaldır, sonra NEOX'u çalıştır.
     exec dbus-run-session -- bash -c '
         export XDG_RUNTIME_DIR="'"$XDG_RUNTIME_DIR"'"
         if command -v systemctl >/dev/null 2>&1; then

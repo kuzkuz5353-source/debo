@@ -1,6 +1,8 @@
 # 🎨 Hiroki OS Özelleştirme Rehberi
 
-Neox temasını, masaüstü ortamını ve kendi temanı nasıl oluşturacağını anlatır.
+NEOX temasını ve kendi Hiroki temanı nasıl oluşturacağını anlatır. Hiroki OS artık
+tek masaüstü sunar: **NEOX** (Hyprland tabanlı, Wayland). Bu rehber yalnızca NEOX'a
+özgü özelleştirmeleri kapsar.
 
 ---
 
@@ -26,23 +28,27 @@ hiroki-theme-manager
 
 - **Tema:** `Hiroki-Dark` (varsayılan) / `Hiroki-Light`
 - **Vurgu rengi:** Pembe / Mor / Turkuaz (`~/.config/hiroki/accent.conf`)
-- **Duvar kağıdı:** 5 seçenek → anında `feh`/`gsettings`/`xfconf` ile uygulanır
+- **Duvar kağıdı:** 5 seçenek → `hyprctl hyprpaper` IPC ile anında uygulanır
 
 Manüel:
 
 ```bash
-# GTK
-gsettings set org.gnome.desktop.interface gtk-theme 'Hiroki-Dark'
-gsettings set org.gnome.desktop.interface icon-theme 'Hiroki-Icons'
-xfconf-query -c xsettings -p /Net/ThemeName -s Hiroki-Dark
+# GTK (settings.ini üzerinden, Wayland/NEOX oturumunda anlık)
+cat > ~/.config/gtk-3.0/settings.ini <<'EOF'
+[Settings]
+gtk-theme-name=Hiroki-Dark
+gtk-icon-theme-name=Hiroki-Icons
+EOF
 
-# Duvar kağıdı (XFCE)
-xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/last-image -s /usr/share/hiroki/wallpapers/minimal-mountain.jpg
-# GNOME
-gsettings set org.gnome.desktop.background picture-uri file:///usr/share/hiroki/wallpapers/minimal-mountain.jpg
-# i3/Hyprland
-feh --bg-scale /usr/share/hiroki/wallpapers/space-theme.jpg
-# Hyprland waybar vs.
+# Duvar kağıdı (NEOX / hyprpaper)
+hyprctl hyprpaper preload /usr/share/hiroki/wallpapers/minimal-mountain.jpg
+hyprctl hyprpaper wallpaper ",/usr/share/hiroki/wallpapers/minimal-mountain.jpg"
+```
+
+Ya da doğrudan NEOX'un kendi motorunu kullanın:
+
+```bash
+neox-theme-engine neox-hd --accent '#E91E8C'
 ```
 
 ---
@@ -51,8 +57,8 @@ feh --bg-scale /usr/share/hiroki/wallpapers/space-theme.jpg
 
 Konum: `/usr/share/themes/Hiroki-Dark/`
 
-- `gtk-3.0/gtk.css` — Arc Dark tabanlı, Hiroki renkleri
-- `gtk-2.0/gtkrc`
+- `gtk-3.0/gtk.css`
+- `gtk-4.0/gtk.css`
 
 Kendi varyantını oluştur:
 
@@ -60,8 +66,9 @@ Kendi varyantını oluştur:
 sudo cp -r /usr/share/themes/Hiroki-Dark /usr/share/themes/Hiroki-My
 sudo nano /usr/share/themes/Hiroki-My/gtk-3.0/gtk.css
 # @define-color hiroki_pink #E91E8C; satırını değiştir
-gsettings set org.gnome.desktop.interface gtk-theme 'Hiroki-My'
 ```
+
+`~/.config/gtk-3.0/settings.ini` içindeki `gtk-theme-name` değerini `Hiroki-My` yapın.
 
 ---
 
@@ -75,78 +82,39 @@ Kendi ikonunu ekle:
 mkdir -p ~/.local/share/icons/Hiroki-My/48x48/apps
 cp my-icon.png ~/.local/share/icons/Hiroki-My/48x48/apps/
 gtk-update-icon-cache ~/.local/share/icons/Hiroki-My
-gsettings set org.gnome.desktop.interface icon-theme 'Hiroki-My'
 ```
+
+`~/.config/gtk-3.0/settings.ini` içindeki `gtk-icon-theme-name` değerini `Hiroki-My` yapın.
 
 ---
 
-## 5. Masaüstü Ortamı Değiştirme
+## 5. NEOX Masaüstü Özelleştirme
 
-### Kurulum Sonrası Yeni DE Ekle
+NEOX'un tüm yapılandırması `~/.config/neox/` ve `~/.config/hypr/hyprland.conf` altındadır.
 
-```bash
-# Örn. KDE ekle (XFCE kurulu iken)
-sudo pacman -S plasma-meta kde-applications konsole dolphin kate sddm
-sudo systemctl enable sddm --force
-# GDM/LightDM çakışırsa disable et: sudo systemctl disable lightdm
-```
+### Hyprland (derleyici) ayarları
+- `~/.config/hypr/hyprland.conf` — kaynak: `neox-desktop/compositor/hyprland.conf`
+- Renk, border, blur, animasyon ayarları burada
+- Değişikliklerden sonra: `hyprctl reload`
 
-### Varsayılan DE'yi Değiştir (Display Manager)
+### NEOX kabuğu ayarları
+- `~/.config/neox/neox.conf` — genel davranış
+- `~/.config/neox/keybindings.conf` — kısayollar (kaynak dosyadan `source =` ile dahil edilir)
+- `~/.config/neox/autostart.conf` — oturum açılışında çalışacak komutlar
+- `~/.config/neox/gestures.conf` — dokunmatik/touchpad jestleri
 
-LightDM:
-```bash
-sudo nano /etc/lightdm/lightdm.conf
-# user-session=xfce  →  plasma / gnome / budgie-desktop / lxqt / i3
-```
+### Panel araçları
+- `rofi` (uygulama başlatıcı) → `~/.config/rofi/config.rasi`
+- `waybar` (isteğe bağlı ek panel) → `~/.config/waybar/config` + `style.css`
+- `wofi` (alternatif başlatıcı) → `~/.config/wofi/hiroki.css`
+- `mako` / `dunst` (bildirim) → `~/.config/mako/config`, `~/.config/dunst/dunstrc`
+- `picom` (X11 uygulamaları için opsiyonel compositor katmanı) → `~/.config/picom/picom.conf`
 
-SDDM (KDE):
-```bash
-sudo nano /etc/sddm.conf.d/hiroki.conf
-# Session=xfce.desktop → plasma.desktop
-```
-
-### Hiroki DE Seçiciyi Yeniden Çalıştır
-
-```bash
-hiroki-de-selector
-# Donanımı yeniden tarar, 10 DE arasında seçim, /tmp/hiroki-selected-de yazar
-# Calamares kurulumunda bu seçim paketleri belirler; kurulu sistemde manuel pacman gerekir
-```
+Kısayol rehberi ve tüm bağlamalar için: [`neox-desktop/config/keybindings.conf`](neox-desktop/config/keybindings.conf)
 
 ---
 
-## 6. Her DE İçin Özelleştirme İpuçları
-
-### XFCE
-- Panel: Sağ tık → Panel Tercihleri → Yarı saydam koyu (`#1A1A2E` 85%)
-- Whisker Menü → Hiroki logosu: `/usr/share/icons/hiroki/hiroki-icon.png`
-- Conky: `~/.config/conky/hiroki-conky.conf` → `conky -c ~/.config/conky/hiroki-conky.conf &`
-- Thunar koyu tema zaten `settings.ini` ile gelir
-
-### KDE Plasma
-- Sistem Ayarları → Görünüm → Global Tema: Hiroki Dark
-- Renk şeması: `/usr/share/color-schemes/HirokiDark.colors` (kopyala)
-- SDDM: `/usr/share/sddm/themes/hiroki/`
-
-### GNOME
-- `gnome-tweaks` → Görünüm → Hiroki-Dark, Hiroki-Icons
-- Eklentiler: Dash to Dock, AppIndicator, User Themes, Blur my Shell
-- `dconf dump / > backup.dconf` ile yedek
-
-### i3wm
-- Config: `~/.config/i3/config` (Hiroki renkleri, gaps, picom, rofi)
-- `rofi -show drun -theme /usr/share/rofi/themes/hiroki.rasi`
-- `picom --experimental-backends &` (compositor)
-- Kısayol rehberi: `Mod+F1` → `/usr/share/hiroki/i3-shortcuts.txt`
-
-### Hyprland
-- `~/.config/hypr/hyprland.conf` (mor/pembe border, rounding 12, blur)
-- `waybar` → `~/.config/waybar/config` + `style.css` (Hiroki renkleri)
-- `wofi` → `~/.config/wofi/hiroki.css`
-
----
-
-## 7. GRUB Teması
+## 6. GRUB Teması
 
 Konum: `/usr/share/grub/themes/hiroki/theme.txt`
 
@@ -164,7 +132,7 @@ sudo cp ~/resim.png /usr/share/grub/themes/hiroki/background.png
 
 ---
 
-## 8. Plymouth (Açılış Animasyonu)
+## 7. Plymouth (Açılış Animasyonu)
 
 ```bash
 sudo plymouth-set-default-theme -R hiroki
@@ -175,23 +143,22 @@ Tema dosyaları: `/usr/share/plymouth/themes/hiroki/hiroki.script`
 
 ---
 
-## 9. Neofetch / Fastfetch
+## 8. Neofetch / Fastfetch
 
 ```bash
 fastfetch --logo /usr/share/hiroki/ascii/hiroki.txt
-neofetch --ascii_distro hiroki
+hiroki-neofetch
 ```
 
 Yapılandırma:
-- `~/.config/neofetch/config.conf` → `/usr/share/hiroki/neofetch/config.conf` kopyalanır
 - `~/.config/fastfetch/config.jsonc`
 
 ---
 
-## 10. Kendi Temanı Oluştur ve Paketle
+## 9. Kendi Temanı Oluştur ve Paketle
 
 1. `hiroki-theme-my` klasörü oluştur
-2. GTK, ikon, duvar kağıdı ekle
+2. GTK, ikon, duvar kağıdı ve/veya `neox-desktop/themes/*.css` tabanlı NEOX teması ekle
 3. `PKGBUILD` yaz (AUR örneği):
 ```bash
 pkgname=hiroki-theme-my
@@ -207,16 +174,20 @@ Topluluğa gönder: https://github.com/hiroki-os/hiroki-os/issues
 
 ---
 
-## 11. Dosya Haritası
+## 10. Dosya Haritası
 
 ```
-airootfs/usr/share/themes/Hiroki-Dark/      # GTK
-airootfs/usr/share/icons/Hiroki-Icons/      # İkon
-airootfs/usr/share/hiroki/wallpapers/5x.jpg # Duvar kağıtları
-airootfs/usr/share/grub/themes/hiroki/      # GRUB
-airootfs/usr/share/plymouth/themes/hiroki/  # Plymouth
-airootfs/etc/skel/.config/gtk-3.0/settings.ini # Varsayılan GTK
-airootfs/etc/skel/.bashrc                   # Hiroki prompt + fastfetch
+airootfs/usr/share/themes/Hiroki-Dark/          # GTK
+airootfs/usr/share/icons/Hiroki-Icons/          # İkon
+airootfs/usr/share/hiroki/wallpapers/5x.jpg     # Duvar kağıtları
+airootfs/usr/share/grub/themes/hiroki/          # GRUB
+airootfs/usr/share/plymouth/themes/hiroki/      # Plymouth
+airootfs/usr/share/neox-desktop/                # NEOX kaynak ağacı (canlı ortamdaki kopya)
+airootfs/etc/skel/.config/hypr/                 # Varsayılan Hyprland yapılandırması
+airootfs/etc/skel/.config/{rofi,waybar,wofi,mako,dunst,picom}/  # NEOX panel araçları
+airootfs/etc/skel/.config/gtk-3.0/settings.ini  # Varsayılan GTK
+airootfs/etc/skel/.bashrc                       # Hiroki prompt + fastfetch
+neox-desktop/                                   # NEOX masaüstü kaynak kodu
 ```
 
 İyi özelleştirmeler! 🌸

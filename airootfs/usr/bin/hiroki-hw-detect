@@ -2,6 +2,9 @@
 # Hiroki OS - Donanım Algılama Motoru
 # Neox 1.0 - hiroki-hw-detect
 # /proc/meminfo, /proc/cpuinfo, lspci, lsblk, systemd-detect-virt kullanarak analiz yapar
+# Hiroki OS artık tek masaüstü sunar: NEOX. Bu araç yalnızca donanım bilgisini
+# toplar ve NEOX'un minimum gereksinimleri karşılanıyor mu diye bilgilendirir;
+# masaüstü seçimi yapmaz.
 # Çıktı: JSON -> /tmp/hiroki-hw-info.json ve STDOUT
 
 set -euo pipefail
@@ -89,45 +92,8 @@ get_virt() {
     fi
 }
 
-# --- Öneri Matrisi ---
-get_recommendation() {
-    local ram_mb=$1
-    local recommendation primary secondary message tier
-
-    if [[ $ram_mb -le 512 ]]; then
-        tier="minimal"
-        primary="i3wm,openbox"
-        secondary="lxqt"
-        message="Donanımınız çok sınırlı, pencere yöneticisi kullanmanız önerilir"
-        recommendation="i3wm"
-    elif [[ $ram_mb -gt 512 && $ram_mb -lt 2048 ]]; then
-        tier="light"
-        primary="lxqt"
-        secondary="xfce"
-        message="Donanımınız hafif bir masaüstü ortamı için uygun"
-        recommendation="lxqt"
-    elif [[ $ram_mb -ge 2048 && $ram_mb -lt 4096 ]]; then
-        tier="medium"
-        primary="xfce"
-        secondary="lxqt,mate"
-        message="Donanımınız orta seviye masaüstü ortamları için uygun"
-        recommendation="xfce"
-    elif [[ $ram_mb -ge 4096 && $ram_mb -lt 8192 ]]; then
-        tier="full"
-        primary="kde"
-        secondary="xfce,gnome,cinnamon,budgie"
-        message="Donanımınız tam özellikli masaüstü ortamları için uygun"
-        recommendation="kde"
-    else # 8192+
-        tier="high"
-        primary="kde,gnome"
-        secondary="all"
-        message="Donanımınız tüm masaüstü ortamlarını rahatça çalıştırabilir"
-        recommendation="kde"
-    fi
-
-    echo "$tier|$primary|$secondary|$message|$recommendation"
-}
+# NEOX (Hyprland tabanlı Wayland masaüstü) için önerilen minimum: 4 GB RAM.
+NEOX_MIN_RAM_MB=4096
 
 # --- ANA ÇALIŞMA ---
 RAM_MB=$(get_ram_mb)
@@ -144,15 +110,11 @@ if [[ "$VIRT" != "none" && "$VIRT" != "" ]]; then
     IS_VM="true"
 fi
 
-REC_LINE=$(get_recommendation "$RAM_MB")
-TIER=$(echo "$REC_LINE" | cut -d'|' -f1)
-PRIMARY=$(echo "$REC_LINE" | cut -d'|' -f2)
-SECONDARY=$(echo "$REC_LINE" | cut -d'|' -f3)
-MESSAGE=$(echo "$REC_LINE" | cut -d'|' -f4)
-RECOMMENDED=$(echo "$REC_LINE" | cut -d'|' -f5)
-
-# Alternatif liste oluştur (tüm DE'ler)
-ALL_DES="xfce,kde,gnome,cinnamon,mate,budgie,lxqt,i3wm,openbox,hyprland"
+if [[ $RAM_MB -lt $NEOX_MIN_RAM_MB ]]; then
+    MESSAGE="Donanımınız NEOX için önerilen ${NEOX_MIN_RAM_MB}MB RAM'in altında; performans sorunları yaşayabilirsiniz."
+else
+    MESSAGE="Donanımınız NEOX (Hyprland tabanlı) masaüstünü rahatça çalıştırabilir."
+fi
 
 # JSON oluştur
 cat > "$OUTPUT_FILE" <<EOF
@@ -167,32 +129,14 @@ cat > "$OUTPUT_FILE" <<EOF
   "disk_gb": $DISK_GB,
   "virt": "$VIRT",
   "is_vm": $IS_VM,
-  "tier": "$TIER",
-  "primary": "$PRIMARY",
-  "secondary": "$SECONDARY",
   "message": "$MESSAGE",
-  "recommended": "$RECOMMENDED",
-  "all_des": "$ALL_DES",
+  "recommended": "neox",
+  "all_des": "neox",
   "timestamp": "$(date -Iseconds)"
 }
 EOF
 
 # Ayrıca stdout'a da yaz
 cat "$OUTPUT_FILE"
-
-# Uyarı kontrolü için yardımcı: eğer kullanıcı ağır DE seçerse uyarı göster
-# Bu fonksiyon Calamares modülü veya GUI tarafından çağrılır
-if [[ "${2:-}" == "--check-warning" ]]; then
-    SELECTED="${3:-}"
-    HEAVY_DES=("kde" "gnome" "hyprland" "cinnamon" "budgie")
-    if [[ $RAM_MB -le 2048 ]]; then
-        for d in "${HEAVY_DES[@]}"; do
-            if [[ "$SELECTED" == "$d" ]]; then
-                echo "UYARI: Seçtiğiniz masaüstü ortamı ($SELECTED) donanımınız için ağır olabilir (RAM: ${RAM_MB}MB). Performans sorunları yaşayabilirsiniz." >&2
-                exit 10
-            fi
-        done
-    fi
-fi
 
 exit 0

@@ -102,13 +102,11 @@ setup_airootfs() {
     # Dosya izinlerini kontrol et (profiledef.sh file_permissions)
     local scripts=(
         "airootfs/usr/bin/hiroki-hw-detect"
-        "airootfs/usr/bin/hiroki-de-selector"
         "airootfs/usr/bin/hiroki-welcome"
         "airootfs/usr/bin/hiroki-theme-manager"
         "airootfs/usr/bin/hiroki-update"
         "airootfs/usr/bin/hiroki-btrfs-assistant"
         "airootfs/usr/bin/hiroki-driver-manager"
-        "airootfs/etc/hiroki/post-install/hiroki-post-install.sh"
     )
     for s in "${scripts[@]}"; do
         if [[ -f "$PROFILE_DIR/$s" ]]; then
@@ -120,9 +118,13 @@ setup_airootfs() {
     done
 }
 
-setup_calamares() {
-    log "Calamares kaldirildi - kendi installer kullaniliyor"
-    ok "Hiroki Installer hazir"
+setup_installer() {
+    log "Hiroki Installer kontrol ediliyor (Calamares kullanilmiyor)..."
+    if [[ -f "$PROFILE_DIR/airootfs/usr/bin/hiroki-installer" ]]; then
+        ok "hiroki-installer hazir"
+    else
+        warn "hiroki-installer bulunamadi"
+    fi
 }
 
 setup_themes() {
@@ -156,7 +158,7 @@ setup_welcome() {
 
 setup_custom_tools() {
     log "Özel araçlar kontrol ediliyor..."
-    local tools=(hiroki-de-selector hiroki-theme-manager hiroki-update hiroki-btrfs-assistant hiroki-driver-manager hiroki-network-manager hiroki-kernel-manager hiroki-hello-update)
+    local tools=(hiroki-theme-manager hiroki-update hiroki-btrfs-assistant hiroki-driver-manager hiroki-network-manager hiroki-kernel-manager hiroki-hello-update)
     for t in "${tools[@]}"; do
         if [[ -f "$PROFILE_DIR/airootfs/usr/bin/$t" ]]; then
             ok "Araç: $t"
@@ -263,7 +265,7 @@ main() {
  |_| |_|_|_|  \___/|_|\_\_|\___/|____/
 
   Hiroki OS 1.0 Neox — ISO Derleme Aracı
-  Arch Linux tabanlı • Calamares • Neox gibi zarif
+  Arch Linux tabanlı • NEOX (Hyprland) • Neox gibi zarif
 EOS
     echo -e "${NC}"
 
@@ -274,7 +276,7 @@ EOS
     validate_packages
     configure_pacman
     setup_airootfs
-    setup_calamares
+    setup_installer
     setup_themes
     setup_welcome
     setup_custom_tools

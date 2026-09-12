@@ -362,19 +362,20 @@ inner = 6
 
 ## 12. Installer Entegrasyonu
 
-### Installer DE Seçenekleri
-Artık `DES` dict'i şöyle olacak:
+> **Not:** Hiroki OS artık tek masaüstü sunar: **NEOX** (Hyprland tabanlı, Wayland).
+> `hiroki-installer`'daki `DES` sözlüğü yalnızca `neox` girdisini içerir; Linis ve
+> aşağıdaki örnekte listelenen diğer WM/DE'ler (Openbox, LXQt, XFCE, MATE, Cinnamon,
+> KDE, GNOME) kaldırılmıştır ve kurulabilir seçenekler değildir. Bu bölüm, Linis'in
+> gelecekte NEOX'un yanında ayrı, bağımsız bir proje olarak nasıl entegre
+> edilebileceğine dair tarihsel bir tasarım taslağı olarak saklanmaktadır.
+
+### (Tarihsel) Installer DE Seçenekleri örneği
+Linis ayrı bir proje olarak paketlenirse `DES` dict'i şu şekilde görünebilirdi
+(şu an fiilen kullanılmamaktadır):
 ```python
 DES = {
     "linis": {"name": "Linis", "ram": 1024, "desc": "Tokyo Night tarzı custom WM",
               "packages": ("linis",), "dm": "lightdm"},
-    "openbox": {"name": "Openbox", ...},
-    "lxqt": {"name": "LXQt", ...},
-    "xfce": {"name": "XFCE", ...},
-    "mate": {"name": "MATE", ...},
-    "cinnamon": {"name": "Cinnamon", ...},
-    "kde": {"name": "KDE Plasma", ...},
-    "gnome": {"name": "GNOME", ...},
 }
 ```
 

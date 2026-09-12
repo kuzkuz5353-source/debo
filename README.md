@@ -1,12 +1,12 @@
 # 🌸 Hiroki OS 1.0 Neox
 
-**Arch Linux tabanlı, Calamares yükleyicili, neox gibi zarif dağıtım.**
+**Arch Linux tabanlı, NEOX masaüstülü, kendine özgü Hiroki Installer'a sahip modern dağıtım.**
 
-> Felsefe: *Donanımını tanı, ona en uygun masaüstü ortamını öner ama asla zorla. Kullanıcı her zaman son kararı verir.*
+> Felsefe: *Tek, özenle bütünleştirilmiş bir masaüstü deneyimi sun. Dağınık seçenekler yerine derin, tutarlı ve hızlı bir sistem.*
 
 [![Versiyon](https://img.shields.io/badge/version-1.0%20Neox-E91E8C?style=flat-square)](https://hiroki-os.org)
 [![Taban](https://img.shields.io/badge/taban-Arch%20Linux-1793D1?style=flat-square)](https://archlinux.org)
-[![Yükleyici](https://img.shields.io/badge/yükleyici-Calamares-2D1B69?style=flat-square)](https://calamares.io)
+[![Masaüstü](https://img.shields.io/badge/masaüstü-NEOX%20(Hyprland)-2D1B69?style=flat-square)](neox-desktop/)
 [![Lisans](https://img.shields.io/badge/lisans-GPLv3-00D4AA?style=flat-square)](LICENSE)
 
 ---
@@ -14,24 +14,17 @@
 ## ✨ Özellikler
 
 - **Arch Tabanlı & Rolling Release** — En güncel paketler, AUR hazır (yay/paru)
-- **Akıllı Masaüstü Seçici (hiroki-de-selector)** — RAM, CPU, GPU ve sanal makineyi algılar, 10 ortamdan en uygununu önerir ama seçim tamamen serbest
-- **11 Masaüstü / Pencere Yöneticisi:**
-  - `XFCE` (live varsayılan, dengeli)
-  - `KDE Plasma` (tam özellikli, 4GB+ önerilir)
-  - `GNOME` (modern, Wayland)
-  - `Cinnamon`, `MATE`, `Budgie`, `LXQt`
-  - `i3wm`, `Openbox`, `Hyprland` (Wayland tiling)
-  - `NEOX` (Hyprland tabanlı, mobil ilhamlı Wayland masaüstü — bkz. `neox-desktop/`)
+- **Tek Masaüstü: NEOX** — Hyprland tabanlı, mobil ilhamlı, GTK4 katman kabuğu (layer-shell) ile yazılmış Wayland masaüstü (bkz. `neox-desktop/`). Hiroki OS artık masaüstü seçimi sunmaz; tüm deneyim NEOX etrafında derinlemesine bütünleştirilmiştir.
 - **Hiroki Tasarım Dili:**
   - Renkler: `#2D1B69` (koyu mor), `#E91E8C` (pembe), `#00D4AA` (turkuaz), `#0D0D1A` / `#1A1A2E` (koyu arkaplan)
-  - **Hiroki-Dark** GTK2/3 teması (Arc Dark tabanlı)
+  - **Hiroki-Dark** GTK3/4 teması
   - **Hiroki-Icons** (Papirus Dark tabanlı, mor klasörler)
-  - 5 özel duvar kağıdı: neox-gradients, geometrik dalgalar, minimalist dağ, soyut neon, uzay teması
-  - GRUB, LightDM/SDDM/GDM, Plymouth temaları
-- **Calamares Entegrasyonu:** Welcome → Locale → Keyboard → Partition (Btrfs subvolume `@`, `@home`, `@snapshots`) → **hiroki-de-select** → Netinstall → Users → Summary → Install
-- **Hoş Geldiniz Merkezi (hiroki-welcome):** Live ve ilk açılışta donanım özetini, öneriyi ve hızlı eylemleri gösterir (GTK3/Python)
+  - 5 özel duvar kağıdı: neox-gradient, geometrik dalgalar, minimalist dağ, soyut neon, uzay teması
+  - GRUB ve Plymouth temaları
+- **Hiroki Installer:** Kendi yazdığımız, PyQt6 tabanlı grafik kurulum sihirbazı (Calamares kullanılmaz). Disk seçimi → kullanıcı/parola → dil/klavye/saat dilimi → Btrfs veya ext4 → NEOX kurulumu → GRUB.
+- **Hoş Geldiniz Merkezi (hiroki-welcome):** Live ve ilk açılışta donanım özetini ve hızlı eylemleri gösterir (GTK3/Python)
 - **Araçlar:** `hiroki-theme-manager`, `hiroki-update` (pacman + AUR), `hiroki-btrfs-assistant` (Btrfs/Timeshift), `hiroki-driver-manager` (NVIDIA odaklı)
-- **Türkçe Varsayılan, Çok Dilli:** `tr_TR.UTF-8`, `en_US.UTF-8`, `ja_JP.UTF-8` (+ de, fr vb.)
+- **Türkçe Varsayılan, Çok Dilli:** `tr_TR.UTF-8`, `en_US.UTF-8`
 - **Btrfs + Timeshift, PipeWire, NetworkManager, UFW, CUPS, Bluetooth**
 - **🧊 Hiroki OS Btrfs Asistanı (`hiroki-btrfs-assistant`)** — Her paket kurulumu/güncellemesi/kaldırma işleminden önce pacman hook'u üzerinden otomatik Btrfs anlık görüntüsü (snapshot) alır; `grub-btrfsd` ile bu snapshotlar GRUB önyükleme menüsüne ("Hiroki OS Neox Snapshots" alt menüsü) otomatik eklenir, böylece bir sorun anında doğrudan GRUB'dan eski bir snapshot ile açılış yapıp sisteminizi tek tıkla geri döndürebilirsiniz.
 - **🌐 Gelişmiş Ağ & DNS Yönetimi (`hiroki-network-manager`)** — Cloudflare, Google, Quad9, OpenDNS, AdGuard, Yandex gibi hazır sağlayıcılar arasında tek tıkla, sistem genelinde DNS değiştirme; ayrıca ana sistem ağınızdan tamamen bağımsız/izole çalışan ayrı bir "İzole İnternet Sürücüsü" (network namespace tabanlı) ile seçtiğiniz uygulamaları izole ağ üzerinden çalıştırabilme.
@@ -42,11 +35,11 @@
 
 ## 🖥️ Ekran Görüntüleri
 
-> ISO derlendiğinde `/usr/share/hiroki/wallpapers/` altındaki duvar kağıtları ve Calamares slaytları (5 slayt) burada görünecek.
+> ISO derlendiğinde `/usr/share/hiroki/wallpapers/` altındaki duvar kağıtları burada görünecek.
 
 | Duvar Kağıdı | Açıklama |
 |---|---|
-| `neox-gradient.jpg` | Varsayılan: koyu lacivert üzerine mor→pembe gradyan neox dalı |
+| `neox-gradient.jpg` | Varsayılan: koyu lacivert üzerine mor→pembe gradyan |
 | `geometric-waves.jpg` | Geometrik dalgalar, turkuaz vurgu |
 | `minimal-mountain.jpg` | Minimalist dağ, sisli |
 | `abstract-neon.jpg` | Soyut neon ışıklar |
@@ -69,23 +62,23 @@ sudo dd if=hiroki-os-1.0-x86_64.iso of=/dev/sdX bs=4M status=progress oflag=sync
 ```
 
 ### Live Dene
-- Boot menüsü: **"Hiroki OS'u Dene"** → XFCE live, otomatik giriş (`hiroki`/parola yok)
-- Masaüstünde **Hiroki Hoş Geldiniz** otomatik açılır → **Masaüstü Ortamı Seç** ile donanımınıza göre öneriyi görün
-- **Calamares** kısayolu ile kurun
+- Boot menüsü: **"Hiroki OS'u Dene"** → NEOX live, otomatik giriş (`live` kullanıcısı, parola yok)
+- Masaüstünde **Hiroki Hoş Geldiniz** otomatik açılır → hızlı eylemlerden **Hiroki Installer**'ı başlatın
 
 ---
 
-## 🧠 Akıllı Masaüstü Öneri Matrisi
+## 🖥️ NEOX Masaüstü
 
-| RAM | Tier | Birinci Öneri | Alternatif | Mesaj |
-|---|---|---|---|---|
-| ≤512 MB | minimal | i3wm / Openbox | LXQt | Donanımınız çok sınırlı, pencere yöneticisi önerilir |
-| 512 MB – 2 GB | light | LXQt | XFCE | Hafif masaüstü için uygun |
-| 2 – 4 GB | medium | XFCE | LXQt, MATE | Orta seviye için uygun |
-| 4 – 8 GB | full | KDE Plasma | XFCE, GNOME, Cinnamon, Budgie | Tam özellikli için uygun |
-| ≥8 GB | high | KDE + GNOME | Tümü | Tüm ortamları rahatça çalıştırabilir |
+NEOX, Hyprland (Wayland derleyici/pencere yöneticisi) üzerine GTK4 + katman kabuğu (layer-shell) ile
+yazılmış, mobil ilhamlı bir masaüstü kabuğudur. Panel, uygulama arama, görev değiştirici, kontrol
+merkezi, kilit ekranı, bildirim merkezi ve duvar kağıdı yöneticisi gibi bileşenlerin tamamı
+`neox-desktop/` dizininde Python ile yazılmıştır ve `hiroki-dm` (Hiroki'nin kendi Wayland
+görüntü yöneticisi) tarafından başlatılır.
 
-> `hiroki-hw-detect` → `/tmp/hiroki-hw-info.json` → hem `hiroki-de-selector` GUI hem Calamares modülü aynı dosyayı okur. Uyarı: 512 MB + GNOME seçilirse `“Ağır olabilir, devam edilsin mi?”` onayı istenir ama kurulum engellenmez.
+Minimum önerilen donanım: **4 GB RAM**. `hiroki-hw-detect` donanımınızı analiz eder ve NEOX için
+yeterli olup olmadığını bildirir (kurulumu engellemez).
+
+Detaylar için bkz. [`neox-desktop/README.md`](neox-desktop/README.md).
 
 ---
 
@@ -98,8 +91,8 @@ sudo ./build.sh
 # Çıktı: out/hiroki-os-1.0-x86_64.iso + .sha256 + .md5
 ```
 
-Detaylı: [BUILDING.md](BUILDING.md)  
-Kurulum rehberi: [INSTALL.md](INSTALL.md)  
+Detaylı: [BUILDING.md](BUILDING.md)
+Kurulum rehberi: [INSTALL.md](INSTALL.md)
 Tema özelleştirme: [CUSTOMIZATION.md](CUSTOMIZATION.md)
 
 ---
@@ -109,14 +102,15 @@ Tema özelleştirme: [CUSTOMIZATION.md](CUSTOMIZATION.md)
 ```
 hiroki-os/
 ├── airootfs/              # ISO kök dosya sistemi
-│   ├── etc/{hostname,locale.conf,os-release,calamares,hiroki/...}
-│   ├── usr/{bin/hiroki-*,share/hiroki,share/themes/Hiroki-Dark}
-│   └── etc/skel/          # Yeni kullanıcı iskeleti (.bashrc, autostart)
+│   ├── etc/{hostname,locale.conf,os-release,hiroki/...}
+│   ├── usr/{bin/hiroki-*,share/hiroki,share/themes/Hiroki-Dark,share/neox-desktop}
+│   └── etc/skel/          # Yeni kullanıcı iskeleti (.bashrc, hypr/, waybar/, rofi/, autostart)
+├── neox-desktop/          # NEOX masaüstü kaynak kodu (Hyprland tabanlı)
 ├── efiboot/ grub/ syslinux/ # Bootloader'lar
-├── packages.x86_64        # Paket listesi (kategorili)
+├── packages.x86_64        # Paket listesi (kategorili, tek masaüstü: NEOX)
 ├── pacman.conf            # multilib aktif
 ├── profiledef.sh          # Archiso profili (HIROKI_OS)
-└── build.sh               # Derleme scripti (16 adım)
+└── build.sh               # Derleme scripti
 ```
 
 Tam harita: `CUSTOMIZATION.md` ve `docs/FILEMAP.md`
