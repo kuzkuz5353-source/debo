@@ -34,12 +34,12 @@ def get_info():
     except: info.append(("Packages", "?"))
     info.append(("Shell", os.environ.get("SHELL","bash").split("/")[-1]))
     de = os.environ.get("XDG_SESSION_DESKTOP","")
-    if not de: de = "KDE Plasma"
+    if not de: de = "NEOX"
     info.append(("DE", de))
     try:
-        wm = subprocess.getoutput("ps -eo comm | grep kwin | grep -v grep | head -1").strip()
-        info.append(("WM", wm if wm else "KWin"))
-    except: info.append(("WM", "KWin"))
+        wm = subprocess.getoutput("ps -eo comm | grep -i hyprland | grep -v grep | head -1").strip()
+        info.append(("WM", wm if wm else "Hyprland"))
+    except: info.append(("WM", "Hyprland"))
     try:
         with open("/proc/cpuinfo") as f:
             for l in f:

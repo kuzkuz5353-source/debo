@@ -1,6 +1,8 @@
 # 💿 Hiroki OS Kurulum Rehberi — Neox 1.0
 
 Bu belge BIOS ve UEFI, disk bölümleme, dual-boot ve kurulum sonrası adımları kapsar.
+Hiroki OS artık tek masaüstü sunar: **NEOX** (Hyprland tabanlı, Wayland). Kurulum
+Calamares yerine kendi grafik sihirbazımız **Hiroki Installer** (PyQt6) ile yapılır.
 
 ---
 
@@ -8,13 +10,14 @@ Bu belge BIOS ve UEFI, disk bölümleme, dual-boot ve kurulum sonrası adımlar�
 
 | Bileşen | Minimum | Önerilen |
 |---|---|---|
-| RAM | 512 MB (i3wm/Openbox) | 4 GB+ (KDE/GNOME rahat) |
-| Disk | 15 GB (Calamares kontrol eder) | 30 GB+ (Btrfs snapshot için 40 GB) |
+| RAM | 2 GB | 4 GB+ (NEOX için önerilen) |
+| Disk | 15 GB | 30 GB+ (Btrfs snapshot için 40 GB) |
 | CPU | 1 GHz, 1 çekirdek | 2 GHz, 2+ çekirdek |
-| GPU | VESA uyumlu | Mesa / Vulkan destekli (AMD/Intel/NVIDIA) |
+| GPU | Mesa destekli (KMS) | Vulkan destekli (AMD/Intel/NVIDIA) |
 | Ortam | BIOS veya UEFI | UEFI + Secure Boot kapalı |
 
-> `hiroki-hw-detect` kurulum öncesi donanımınızı analiz eder ve en uygun DE'yi önerir ama seçim serbesttir.
+> `hiroki-hw-detect` kurulum öncesi donanımınızı analiz eder ve NEOX için yeterli olup
+> olmadığını bildirir (kurulumu engellemez).
 
 ---
 
@@ -40,32 +43,33 @@ Secure Boot: Hiroki OS Secure Boot imzalı değildir; BIOS'ta **Secure Boot'u ka
 
 ISO açıldığında GRUB/slideshow:
 
-- **Hiroki OS'u Dene** — XFCE live, otomatik giriş (`hiroki` / şifre yok)
-- **Hiroki OS'u Kur** — Doğrudan Calamares
+- **Hiroki OS'u Dene** — NEOX live, otomatik giriş (`live` kullanıcısı, şifre yok)
+- **Hiroki OS'u Kur** — Hiroki Installer'ı başlatır
 - **Donanım Bilgisi** / **Bellek Testi**
 - BIOS: Syslinux menüsü aynı seçenekleri sunar
 
 Live masaüstünde:
 
-- **Hiroki Hoş Geldiniz** otomatik açılır → **Masaüstü Ortamı Seç** ile öneriyi gör
-- **Calamares** kısayolu (masaüstü/dock)
+- **Hiroki Hoş Geldiniz** otomatik açılır → **Hiroki Installer'ı Başlat** ile kuruluma geçin
 
-İnternet: Sağ üst ağ simgesi → Wi-Fi/Ethernet. Kurulum öncesi bağlanmanız önerilir (paketler için).
+İnternet: NEOX panelindeki ağ simgesi → Wi-Fi/Ethernet. Kurulum öncesi bağlanmanız önerilir (paketler için).
 
 ---
 
-## 4. Calamares Adımları
+## 4. Hiroki Installer Adımları
 
-1. **Welcome** — Dil seç (Türkçe varsayılan), internet/disk/RAM kontrolü
-2. **Locale** — Bölge `Europe/Istanbul`, saat dilimi, `tr_TR.UTF-8`
-3. **Keyboard** — `tr` (Q), model `pc105`
-4. **Partition** — Bkz. aşağı
-5. **Hiroki DE Select** — Akıllı öneri + 10 seçenek (XFCE, KDE, GNOME, Cinnamon, MATE, Budgie, LXQt, i3wm, Openbox, Hyprland)
-   - Uyarı: 512 MB + KDE/GNOME seçerseniz “Ağır olabilir, devam edilsin mi?” sorusu gelir; onaylarsanız kurulur
-6. **Netinstall** — Firefox, VLC, LibreOffice, Timeshift vb. ek yazılımlar
-7. **Users** — Kullanıcı, şifre, hostname, autologin, root şifresi opsiyonel; varsayılan shell `/bin/bash`; gruplar `wheel,network,video,audio,storage`
-8. **Summary** — Özet
-9. **Install** → **Finished** → Yeniden başlat
+Hiroki Installer tek pencereli bir sihirbazdır:
+
+1. **Mod seç** — `wipe` (diski tamamen sil ve kur) veya `partition` (mevcut bölüme kur)
+2. **Disk / bölüm seç**
+3. **Kullanıcı adı, bilgisayar adı, parola**
+4. **Dil / saat dilimi / klavye düzeni** (`tr_TR.UTF-8` / `en_US.UTF-8`, `Europe/Istanbul` / `UTC`, `trq` / `us`)
+5. **Yeni Linux alanı (GiB)** — `partition` modunda kullanılmaz
+6. **Önizleme ve onay** — Disk yazma işlemleri yalnızca burada verdiğiniz açık onaydan sonra başlar
+7. **Kurulum** — Bölümleme, `pacstrap`, NEOX kurulumu, GRUB, `hiroki-dm` etkinleştirme
+8. **Bitti** → Yeniden başlat
+
+Masaüstü seçimi yoktur: kurulan tek masaüstü **NEOX**'tur.
 
 ---
 
@@ -73,40 +77,32 @@ Live masaüstünde:
 
 ### Otomatik (Önerilen - Yeni Başlayan)
 
-Calamares → **Diski Sil** →
+Hiroki Installer → **wipe modu** →
 
 - **ext4:** Basit, stabil
-- **btrfs:** Önerilen (snapshot desteği). Seçerseniz otomatik subvolume:
+- **btrfs:** Önerilen (snapshot desteği). Otomatik subvolume:
   ```
   @         → /
   @home     → /home
   @snapshots → /.snapshots
-  @var_log  → /var/log
-  @cache    → /var/cache
   ```
   + `compress=zstd:1,ssd,noatime`
 
-Swap: **none / small (512 MB swap file) / suspend (RAM kadar) / file (özel)**
+### Manuel (partition modu)
 
-### Manuel
-
-- **UEFI:** En az 300 MB FAT32 `/boot/efi` (esp, boot flag)
-- **BIOS:** 1 MB `bios_grub` veya `/boot`
-- `/` en az 15 GB, `ext4`/`btrfs`/`xfs`/`f2fs`
-- EFI + `/` + `swap` + `/home` ayırabilirsiniz
+- **UEFI:** En az 300 MB FAT32 EFI bölümü
+- **BIOS:** GRUB için `bios_grub` bölümü veya ayrı `/boot`
+- `/` en az 15 GB, `ext4` veya `btrfs`
+- Mevcut bölümlenmiş diskinize kurmak için `partition` modunu seçin (bölümler biçimlendirilmez)
 
 ### Dual Boot (Windows ile)
 
 1. Windows'ta disk küçült (Disk Management → Shrink)
-2. Hiroki kurulumunda **Yan yana kur** veya **Manuel** → boş alanı kullan
+2. Boşta kalan bölüme Hiroki Installer'ın `partition` modu ile kurun
 3. GRUB `os-prober` Windows'u otomatik bulur (`GRUB_DISABLE_OS_PROBER=false`)
 4. BIOS boot sırası: Hiroki/Arch ilk
 
 > UEFI + Windows BitLocker varsa BitLocker'ı duraklatın.
-
-### Şifreli (LUKS)
-
-Calamares → **Partition** → **Encrypt** → parola gir. `luksbootkeyfile` modülü anahtar dosyayı yönetir.
 
 ---
 
@@ -115,10 +111,9 @@ Calamares → **Partition** → **Encrypt** → parola gir. `luksbootkeyfile` mo
 | Özellik | BIOS (Legacy) | UEFI |
 |---|---|---|
 | Partition tablosu | MBR | GPT (önerilen) |
-| Bootloader | GRUB MBR | GRUB ESP (`/boot/efi`) |
+| Bootloader | GRUB MBR | GRUB ESP |
 | Secure Boot | Yok | Kapat önerilir |
-| Calamares modu | `bios.syslinux.mbr` | `uefi-x64.grub.esp` |
-| Komut | `grub-install --target=i386-pc /dev/sda` | `grub-install --target=x86_64-efi --efi-directory=/boot/efi` |
+| Komut | `grub-install --target=i386-pc /dev/sda` | `grub-install --target=x86_64-efi --efi-directory=/boot` |
 
 Her ikisi de Hiroki profilinde tanımlı (`profiledef.sh` → `bootmodes`).
 
@@ -126,18 +121,14 @@ Her ikisi de Hiroki profilinde tanımlı (`profiledef.sh` → `bootmodes`).
 
 ## 7. Kurulum Sonrası İlk Açılış
 
-1. GRUB → Hiroki temalı menü (10 sn)
+1. GRUB → Hiroki temalı menü
 2. Plymouth neox animasyonu (varsa)
-3. Display Manager:
-   - XFCE/Cinnamon/MATE/Budgie/LXQt/Openbox → **LightDM** (Hiroki GTK greeter)
-   - KDE → **SDDM** (Hiroki teması)
-   - GNOME → **GDM**
-   - i3/Hyprland → LightDM veya `ly`
-4. Giriş → Seçtiğiniz DE Hiroki temasıyla açılır
+3. Görüntü yöneticisi: **hiroki-dm** (Hiroki'nin kendi Wayland görüntü yöneticisi) tty1'de otomatik başlar
+4. Giriş → **NEOX** Hiroki temasıyla açılır
 5. **Hiroki Hoş Geldiniz** ilk açılışta → Güncelle, tema, yedek rehberi
 6. `sudo pacman -Syu` ve `yay` ile sistemi güncel tut
 
-Servisler otomatik etkin: `NetworkManager`, `bluetooth`, `cups`, `ufw`, `fstrim.timer`, `pipewire` + `wireplumber`
+Servisler otomatik etkin: `NetworkManager`, `bluetooth`, `cups`, `ufw`, `fstrim.timer`, `pipewire` + `wireplumber`, `hiroki-dm`
 
 ---
 
@@ -168,9 +159,10 @@ hiroki-theme-manager
 
 - **Wi-Fi yok:** `nmtui` veya `iwctl` ile bağlan; `lspci -k` ile sürücü kontrol et; `hiroki-driver-manager`
 - **Siyah ekran (NVIDIA):** GRUB'da `e` → `nomodeset` ekle → açılış sonrası `sudo pacman -S nvidia` ve `mkinitcpio -P`
+- **NEOX açılmıyor / hiroki-dm hatası:** `journalctl -u hiroki-dm -b` ile günlüğe bakın; `systemctl status hiroki-dm`
 - **GRUB kayboldu (dual-boot):** Live ile aç → `sudo mount /dev/sdXn /mnt` + `sudo arch-chroot /mnt grub-install ... && grub-mkconfig -o /boot/grub/grub.cfg`
 - **Btrfs snapshot geri al:** `sudo snapper list` veya `timeshift --restore`
-- **Şifre unutuldu:** GRUB → `e` → `init=/bin/bash` → `passwd hiroki`
+- **Şifre unutuldu:** GRUB → `e` → `init=/bin/bash` → `passwd <kullanıcı>`
 
 ---
 

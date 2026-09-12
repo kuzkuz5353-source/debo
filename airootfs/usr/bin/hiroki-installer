@@ -53,17 +53,15 @@ MODES = {
     "wipe": "Diski tamamen sil ve kur (Btrfs, @/@home/@snapshots)",
     "partition": "Biçimlendirilmiş bölüme kur (mevcut dosya sistemi korunur)",
 }
+# Hiroki OS artık tek masaüstü sunar: NEOX (Hyprland tabanlı, Wayland).
+# KDE Plasma ve LXQt dahil diğer tüm masaüstü seçenekleri kaldırılmıştır.
 DES = {
-    "kde": {"name": "KDE Plasma", "ram": 4096, "desc": "Plasma masaüstü (ISO'da önceden indirildi)",
-            "packages": ("plasma-meta", "konsole", "dolphin", "kate", "ark", "sddm"), "dm": "sddm"},
-    "lxqt": {"name": "LXQt", "ram": 1024, "desc": "Hafif Qt masaüstü (hızlı kurulum)",
-             "packages": ("lxqt", "sddm", "xorg-server", "qt5-base", "qt5-svg"), "dm": "sddm"},
     "neox": {"name": "NEOX", "ram": 4096, "desc": "Hyprland tabanlı, mobil ilhamlı Wayland masaüstü (NEOX)",
-             "packages": ("hyprland", "sddm", "python", "python-gobject", "gtk4", "gtk4-layer-shell",
+             "packages": ("hyprland", "python", "python-gobject", "gtk4", "gtk4-layer-shell",
                           "python-cairo", "grim", "slurp", "wl-clipboard", "cliphist", "brightnessctl",
                           "playerctl", "networkmanager", "bluez", "pipewire", "wireplumber", "polkit",
-                          "hyprpaper", "swayidle", "jq", "imagemagick", "xorg-xwayland", "qt6ct"),
-             "dm": "sddm"},
+                          "hyprpaper", "swayidle", "jq", "imagemagick", "xorg-xwayland", "qt6-base", "qt6ct"),
+             "dm": "hiroki-dm"},
 }
 # NEOX kaynak dosyalarının canlı ortamdaki ve hedef sistemdeki konumu.
 NEOX_SHARE_SRC = Path("/usr/share/neox-desktop")
@@ -74,7 +72,7 @@ BASE_PACKAGES = (
     "dosfstools", "e2fsprogs", "mtools", "polkit", "bash-completion", "usbutils",
     "pciutils", "noto-fonts", "noto-fonts-emoji", "zram-generator",
     "chafa", "python-pillow", "webkit2gtk-4.1", "firefox",
-    "python-pyqt6", "hicolor-icon-theme", "sddm",
+    "python-pyqt6", "hicolor-icon-theme",
     # Hiroki OS Btrfs Asistanı için gerekli paketler
     "btrfs-progs", "timeshift", "grub-btrfs", "inotify-tools", "snapper",
     # Gelişmiş Ağ & DNS Yönetimi için gerekli paketler
@@ -121,11 +119,8 @@ def ram_mb() -> int:
 
 
 def recommended_de(memory: int) -> str:
-    if memory and memory < 1900:
-        return "openbox"
-    if memory < 3900:
-        return "xfce"
-    return "kde"
+    # Hiroki OS artık tek masaüstü sunuyor: NEOX.
+    return "neox"
 
 
 def human_size(value: int) -> str:
@@ -565,7 +560,7 @@ class InstallConfig:
     username: str
     hostname: str
     password: str = field(repr=False, compare=False)
-    de: str = "xfce"
+    de: str = "neox"
     root_partition: str = ""
     boot_partition: str = ""
     root_size_gib: int = 40  # yeni Linux alanı; 0 yalnız free modunda tüm boş alan
@@ -1282,9 +1277,7 @@ class InstallerEngine:
         return self.runner.run(["arch-chroot", str(self.target), *args], **kwargs)
 
     _HIROKI_DM_BIN = (
-        "hiroki-dm", "hiroki-dm-greeter", "hiroki-dm-session",
-        "hiroki-dm-xsession", "hiroki-dm-xinit", "hiroki-dm-wrapper",
-        "hiroki-dm-gui",
+        "hiroki-dm", "hiroki-dm-session", "hiroki-dm-wrapper",
     )
 
     def _install_hiroki_dm(self, plan: Plan):
@@ -1315,17 +1308,17 @@ class InstallerEngine:
             (self.target / "etc" / "systemd" / "system").mkdir(parents=True, exist_ok=True)
             shutil.copy2(conf_src, self.target / "etc" / "systemd" / "system" / "hiroki-dm.service")
 
-        # Kurulu sisteme özel conf: karşılama ekranı göster (otomatik giriş kapalı)
+        # Kurulu sisteme özel conf: kurulum sırasında oluşturulan kullanıcı
+        # ile NEOX oturumu otomatik başlar.
         (hiroki_etc / "hiroki-dm.conf").write_text(
             "# Hiroki Display Manager (hiroki-dm) - kurulu sistem\n"
-            "# AUTO_LOGIN=yes -> acilista kullanici otomatik giris yapar\n"
-            "AUTO_LOGIN=no\n"
-            f"DEFAULT_USER={c.username}\n"
-            f"SESSION={c.de}\n"
-            "DISPLAY_NUM=:1\n"
-            "VT=1\n"
-            "KILL_TIMEOUT=40\n")
+            f"HIROKI_DM_USER={c.username}\n")
         (hiroki_etc / "selected-de").write_text(c.de + "\n")
+        try:
+            self._chroot("systemctl", "enable", "hiroki-dm.service")
+        except CommandError as exc:
+            self.warnings.append("hiroki-dm.service etkinleştirilemedi; grafik oturum manuel başlatılabilir.")
+            self.log("[hiroki-dm] enable başarısız: " + str(exc))
 
     def _install_neox(self, plan: Plan):
         """NEOX (Hyprland tabanlı) masaüstünü hedef sisteme kurar.
@@ -1410,8 +1403,8 @@ class InstallerEngine:
         self._write_target("etc/sudoers.d/10-hiroki-wheel", "%wheel ALL=(ALL:ALL) ALL\n", 0o440)
         self._chroot("visudo", "-cf", "/etc/sudoers")
         self._write_target("etc/systemd/zram-generator.conf", "[zram0]\nzram-size = min(ram / 2, 4096)\ncompression-algorithm = zstd\nswap-priority = 100\n")
-        # SDDM + KDE/LXQt session ayarla
-        self._chroot("systemctl", "enable", "NetworkManager.service", "systemd-timesyncd.service", "sddm.service", stream=True)
+        # Hiroki OS artık tek masaüstünü (NEOX) hiroki-dm ile başlatır.
+        self._chroot("systemctl", "enable", "NetworkManager.service", "systemd-timesyncd.service", stream=True)
         self._chroot("systemctl", "set-default", "graphical.target")
         # Hiroki OS Hello Update: oyun kutuphane/surucu otomatik tamamlama (arka plan)
         try:
@@ -1441,16 +1434,9 @@ class InstallerEngine:
                 self._chroot("systemctl", "enable", "grub-btrfsd.service")
             except CommandError:
                 pass
-        # SDDM otomatik giris
-        sddm_conf = self.target / "etc/sddm.conf.d"
-        sddm_conf.mkdir(parents=True, exist_ok=True)
-        session_map = {"kde": "plasma.desktop", "lxqt": "lxqt.desktop", "neox": "neox.desktop"}
-        session_file = session_map.get(c.de, "plasma.desktop")
-        (sddm_conf / "00-autologin.conf").write_text(
-            f"[Autologin]\nUser={c.username}\nSession={session_file}\n"
-        )
-        if c.de == "neox":
-            self._install_neox(plan)
+        # NEOX oturumu hiroki-dm (Wayland) üzerinden otomatik başlatılır.
+        self._install_hiroki_dm(plan)
+        self._install_neox(plan)
         # Hiroki os-release
         self._write_target("etc/os-release",
             'NAME="Hiroki OS"\nPRETTY_NAME="Hiroki OS 1.0 (Neox)"\n'
@@ -1458,11 +1444,6 @@ class InstallerEngine:
             'HOME_URL="https://hiroki.os"\nBUG_REPORT_URL="https://hiroki.os/issues"\n'
             'LOGO=hiroki-neox-logo\n'
         )
-        if c.de == "openbox":
-            self._write_target("etc/skel/.config/openbox/autostart", "tint2 &\nnitrogen --restore &\npcmanfm --desktop &\n", 0o755)
-            # useradd daha önce çalıştığından mevcut kullanıcı evine de kopyala.
-            self._write_target(f"home/{c.username}/.config/openbox/autostart", "tint2 &\nnitrogen --restore &\npcmanfm --desktop &\n", 0o755)
-            self._chroot("chown", "-R", f"{c.username}:{c.username}", f"/home/{c.username}/.config")
         # Arch lsb-release temizle
         self._chroot("rm", "-f", "/etc/lsb-release")
         self._write_target("etc/lsb-release", "DISTRIB_ID=Hiroki\nDISTRIB_RELEASE=1.0\nDISTRIB_CODENAME=Neox\nDISTRIB_DESCRIPTION=Hiroki OS 1.0 Neox\n")
@@ -1472,7 +1453,7 @@ class InstallerEngine:
             "hiroki-neofetch", "hiroki-welcome", "hiroki-theme",
             "hiroki-wallpaper", "hiroki-tweaks", "hiroki-update",
             "hiroki-driver", "hiroki-backup", "hiroki-partition", "hiroki-flatpak",
-            "hiroki-kde-setup", "hiroki-acbeni", "hiroki-btrfs-assistant",
+            "hiroki-acbeni", "hiroki-btrfs-assistant",
             "hiroki-boot-snapshot", "hiroki-pre-update-snapshot",
             "hiroki-network-manager", "hiroki-kernel-manager", "hiroki-hello-update",
         )
@@ -1520,7 +1501,7 @@ class InstallerEngine:
         src_bashrc = Path("/etc/skel/.bashrc")
         if src_bashrc.is_file():
             shutil.copy2(src_bashrc, user_bashrc)
-        # KDE ayarlarini kopyala (plasmoid, config, wallpaper)
+        # NEOX/Hyprland ayarlarini kopyala (config, wallpaper)
         skel_local = Path("/etc/skel/.local")
         user_local = self.target / f"home/{c.username}/.local"
         if skel_local.is_dir():
@@ -1528,15 +1509,13 @@ class InstallerEngine:
         skel_config = Path("/etc/skel/.config")
         user_config = self.target / f"home/{c.username}/.config"
         user_config.mkdir(parents=True, exist_ok=True)
-        kde_configs = (
-            "plasma-org.kde.plasma.desktop-appletsrc",
-            "plasmashellrc", "kwinrc", "kdeglobals",
-            "plasmarc", "plasma-localerc", "kglobalshortcutsrc",
-        )
-        for cfg in kde_configs:
+        neox_configs = ("mimeapps.list", "gtk-3.0")
+        for cfg in neox_configs:
             src_cfg = skel_config / cfg
             if src_cfg.is_file():
                 shutil.copy2(src_cfg, user_config / cfg)
+            elif src_cfg.is_dir():
+                shutil.copytree(src_cfg, user_config / cfg, dirs_exist_ok=True)
         # Wallpaper'i hedef sisteme kopyala
         wp_src = Path("/usr/share/wallpapers")
         wp_dst = self.target / "usr/share/wallpapers"
@@ -1578,7 +1557,7 @@ class InstallerEngine:
             if not (self.target / path).is_file() or (self.target / path).stat().st_size == 0:
                 raise InstallerError(f"Gerekli kurulum dosyası eksik: {path}")
         self._chroot("getent", "passwd", plan.config.username)
-        self._chroot("systemctl", "is-enabled", "NetworkManager.service", "sddm.service")
+        self._chroot("systemctl", "is-enabled", "NetworkManager.service", "hiroki-dm.service")
 
     def _export_logs(self, plan: Plan):
         self._verify_mounts(plan)
@@ -1725,7 +1704,7 @@ def _config_from_json(engine, d):
         username=d.get("username", "hiroki"),
         hostname=d.get("hostname", "hiroki-pc"),
         password=d.get("password", ""),
-        de=d.get("de", "lxqt"),
+        de=d.get("de", "neox"),
         root_partition=d.get("root_partition", ""),
         boot_partition=d.get("boot_partition", ""),
         root_size_gib=int(d.get("root_size_gib", 40)),
@@ -1744,7 +1723,7 @@ def _config_schema_text():
         '  "username": "hiroki",\n'
         '  "hostname": "hiroki-pc",\n'
         '  "password": "sifre12345",     //  en az 8 karakter\n'
-        '  "de": "lxqt",                 //  lxqt|openbox|xfce|kde|gnome|mate|cinnamon\n'
+        '  "de": "neox",                 //  Hiroki OS tek masaüstü sunar: neox\n'
         '  "root_size_gib": 40,          //  yeni Linux alanı (free modda 0 = tüm boş alan)\n'
         '  "locale": "tr_TR.UTF-8",\n'
         '  "timezone": "Europe/Istanbul",\n'
@@ -2152,7 +2131,7 @@ def gui():
                 username=self.username.text().strip(),
                 hostname=self.hostname.text().strip(),
                 password=self.password.text(),
-                de=self.de_combo.currentData() or "kde",
+                de=self.de_combo.currentData() or "neox",
                 root_partition=root_part,
                 boot_partition=boot_part,
                 root_size_gib=int(self.root_size.value()),

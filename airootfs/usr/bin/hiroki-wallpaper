@@ -629,8 +629,21 @@ class HirokiWallpaper(QMainWindow):
             return
 
         try:
+            config_dir = Path.home() / ".config" / "neox"
+            config_dir.mkdir(parents=True, exist_ok=True)
+            wallpaper_dst = config_dir / "wallpapers" / "current"
+            wallpaper_dst.parent.mkdir(parents=True, exist_ok=True)
+            try:
+                if wallpaper_dst.exists() or wallpaper_dst.is_symlink():
+                    wallpaper_dst.unlink()
+                wallpaper_dst.symlink_to(self._selected_path)
+            except OSError:
+                pass
+            # NEOX/Hyprland: hyprpaper IPC ile duvar kağıdını önden yükle ve uygula.
+            subprocess.run(["hyprctl", "hyprpaper", "preload", self._selected_path],
+                            capture_output=True, text=True, timeout=10)
             result = subprocess.run(
-                ["plasma-apply-wallpaperimage", self._selected_path],
+                ["hyprctl", "hyprpaper", "wallpaper", f",{self._selected_path}"],
                 capture_output=True,
                 text=True,
                 timeout=10,

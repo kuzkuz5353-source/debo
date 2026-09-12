@@ -1,7 +1,9 @@
 # Hiroki OS 1.0 Neox - packages.x86_64
 # Archiso paket listesi - Kategorilere göre organize edilmiştir
-# Live ISO: Linis WM varsayılan olarak çalışır
-# Diğer DE paketleri installer ile hedef sisteme kurulur
+# Hiroki OS artık TEK masaüstü sunar: NEOX (Hyprland tabanlı, Wayland).
+# KDE Plasma, GNOME, Cinnamon, MATE, Budgie, LXQt, XFCE, i3wm, Openbox ve
+# Calamares tamamen kaldırılmıştır. Kurulum hem canlı oturumda hem hedef
+# sistemde yalnızca NEOX'u kurar (bkz. hiroki-installer).
 
 ### TEMEL SİSTEM PAKETLERİ ###
 base
@@ -87,22 +89,17 @@ gvfs-nfs
 udisks2
 udiskie
 
-### XORG VE WAYLAND ###
-xorg-server
-xorg-xinit
-xorg-xrandr
-xorg-xset
-xorg-xprop
-xorg-xkill
-xorg-xauth
-xorg-xinput
+### XORG UYUMLULUK VE WAYLAND (NEOX / Hyprland tabanlı) ###
+# NEOX saf bir Wayland masaüstüdür; XWayland yalnızca eski X11 uygulamalarının
+# çalışabilmesi için tutulur. Bağımsız bir X11 masaüstü oturumu kurulmaz.
+wayland
+wayland-protocols
+xorg-xwayland
 xorg-xhost
-xorg-xdpyinfo
 xdg-utils
 xdg-user-dirs
-wayland
-xorg-xwayland
-wayland-protocols
+xdg-desktop-portal
+xdg-desktop-portal-hyprland
 
 ### GPU SÜRÜCÜLERİ ###
 mesa
@@ -111,15 +108,10 @@ vulkan-radeon
 vulkan-intel
 xf86-video-amdgpu
 xf86-video-ati
-xf86-video-intel
 xf86-video-nouveau
-xf86-video-vesa
-xf86-video-fbdev
 libva-intel-driver
 virtualbox-guest-utils
 xf86-input-libinput
-xf86-input-elographics
-xf86-input-evdev
 
 ### YAZI TİPLERİ ###
 ttf-liberation
@@ -128,6 +120,8 @@ ttf-hack
 ttf-fira-code
 ttf-roboto
 adobe-source-code-pro-fonts
+noto-fonts
+noto-fonts-emoji
 
 ### HİROKİ INSTALLER ###
 python
@@ -138,56 +132,27 @@ polkit-gnome
 shared-mime-info
 tumbler
 
-### LIVE OTURUM - KDE PLASMA ###
-plasma-meta
-kwin
-breeze
-breeze-gtk
-breeze-icons
-oxygen
-konsole
-dolphin
-kate
-ark
-sddm
-xorg-server
-qt5-base
-qt5-svg
-qt5-wayland
-qt6-base
-qt6-svg
-adwaita-cursors
-network-manager-applet
-pavucontrol
-arandr
-galculator
-
-
-### ORTAK MASAÜSTÜ UYGULAMALARI ###
+### ORTAK MASAÜSTÜ UYGULAMALARI (tekilleştirilmiş, NEOX ile uyumlu) ###
+# Not: Her işlev için tek, güçlü bir uygulama seçilmiştir; KDE/GNOME-shell/
+# XFCE'ye özgü kopya/çakışan uygulamalar (ark, dolphin, okular, kcalc,
+# galculator, gwenview, konsole, lxterminal, gnome-terminal, file-roller,
+# engrampa, ristretto, plank, flameshot, arandr, redshift, conky) kaldırıldı.
+foot
+nautilus
+mousepad
+rofi
 vlc
-file-roller
-engrampa
 evince
-okular
 eog
-gwenview
 gnome-calculator
-kcalc
-baobab
 gnome-system-monitor
+gnome-disk-utility
+baobab
 timeshift
 gparted
-# pamac-aur & octopi resmi depolarda yok (yalnız AUR). Kurulum sonrası: yay -S pamac-aur
-conky
-redshift
-gnome-disk-utility
 xarchiver
-lxterminal
-gnome-terminal
-ark
-flameshot
 bleachbit
-plank
+gnome-keyring
 
 ### SES VE MULTİMEDYA ###
 alsa-utils
@@ -215,10 +180,7 @@ firewalld
 gnupg
 
 ### GELİŞTİRİCİ ARAÇLARI ###
-python
 python-pip
-python-gobject
-python-pyqt6
 gtk3
 gtk4
 vte3
@@ -231,17 +193,13 @@ chafa
 lsb-release
 figlet
 lolcat
-python-pyqt6
 
 ### EK ARAÇLAR ###
-reflector
 rate-mirrors
 archlinux-keyring
 pacman-mirrorlist
 
-# Not: bluez, bluez-utils, pipewire, wireplumber, polkit, python-gobject, gtk4
-# yukarıdaki bölümlerde zaten var; burada yalnızca NEOX'a özgü ek paketler listelenir.
-### NEOX MASAÜSTÜ (Hyprland tabanlı) ###
+### NEOX MASAÜSTÜ (Hyprland tabanlı, tek masaüstü) ###
 hyprland
 gtk4-layer-shell
 python-cairo
@@ -255,5 +213,6 @@ hyprpaper
 swayidle
 jq
 imagemagick
+qt6-base
 qt6ct
-xorg-xwayland
+wf-recorder

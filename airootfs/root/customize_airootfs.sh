@@ -1,5 +1,9 @@
 #!/bin/bash
 # Archiso hook: SquashFS olusturulmadan once calisir
+# Hiroki OS artik tek masaustu sunar: NEOX (Hyprland tabanli, Wayland).
+# KDE Plasma, LXQt, XFCE, GNOME, Cinnamon, MATE, Budgie, i3wm, Openbox ve
+# Calamares kaldirilmistir. Canli oturum ve kurulu sistem NEOX + hiroki-dm
+# uzerinden calisir.
 
 # Live kullanici olustur
 useradd -m -G wheel,video,audio,storage,network,users,lp,scanner,uucp -s /bin/bash live 2>/dev/null || true
@@ -20,20 +24,19 @@ mkdir -p /home/live/{Documents,Downloads,Music,Pictures,Videos,Templates,Public}
 for f in /usr/share/hiroki/wallpapers/*; do
   ln -sf "$f" "/home/live/Pictures/$(basename "$f")" 2>/dev/null || true
 done
-for f in /usr/share/backgrounds/xfce/*; do
-  ln -sf "$f" "/home/live/Pictures/$(basename "$f")" 2>/dev/null || true
-done
-# Thunar, xfconf, mimeapps, xfce4 config kopyala
-cp -a /etc/skel/.config/Thunar /home/live/.config/ 2>/dev/null || true
-cp -a /etc/skel/.config/xfce4 /home/live/.config/ 2>/dev/null || true
+# NEOX/Hyprland config, mimeapps, gtk-3.0 config kopyala
 cp -a /etc/skel/.config/mimeapps.list /home/live/.config/ 2>/dev/null || true
 cp -a /etc/skel/.config/gtk-3.0 /home/live/.config/ 2>/dev/null || true
-cp -a /etc/skel/.config/xfce4/terminal /home/live/.config/xfce4/ 2>/dev/null || true
+cp -a /etc/skel/.config/hypr /home/live/.config/ 2>/dev/null || true
+cp -a /etc/skel/.config/rofi /home/live/.config/ 2>/dev/null || true
+cp -a /etc/skel/.config/waybar /home/live/.config/ 2>/dev/null || true
+cp -a /etc/skel/.config/wofi /home/live/.config/ 2>/dev/null || true
+cp -a /etc/skel/.config/mako /home/live/.config/ 2>/dev/null || true
+cp -a /etc/skel/.config/picom /home/live/.config/ 2>/dev/null || true
 cp -a /etc/skel/.gtkrc-2.0 /home/live/ 2>/dev/null || true
 cp -a /etc/skel/.config/user-dirs.dirs /home/live/.config/ 2>/dev/null || true
 cp -a /etc/skel/.local /home/live/ 2>/dev/null || true
 chmod 644 /home/live/.bash_profile 2>/dev/null || true
-chmod 755 /home/live/.xinitrc 2>/dev/null || true
 chown -R live:live /home/live
 
 # /tmp izni
@@ -69,33 +72,11 @@ systemctl enable NetworkManager.service 2>/dev/null || true
 systemctl enable NetworkManager-wait-online.service 2>/dev/null || true
 systemctl enable sshd.service 2>/dev/null || true
 
-# DE paketleri ISO cache'inde hazır (962 paket, ~690MB)
-# Kurulumda pacstrap -c ile bu cache'den hızlı kurulur
-
-# --- Display Manager: getty autologin + .bash_profile (Wayland) ---
-systemctl disable sddm.service 2>/dev/null || true
-systemctl disable hiroki-dm.service 2>/dev/null || true
-systemctl enable getty@tty1.service 2>/dev/null || true
+# --- Display Manager: hiroki-dm (Wayland, NEOX) ---
+systemctl enable hiroki-dm.service 2>/dev/null || true
 systemctl set-default graphical.target 2>/dev/null || true
-echo "kde" > /etc/hiroki/selected-de 2>/dev/null || true
-# live kullanici .bash_profile'i
-mkdir -p /home/live
-cat > /home/live/.bash_profile <<'BPROFILE'
-if [ -z "$WAYLAND_DISPLAY" ] && [ "$XDG_VTNR" = "1" ]; then
-    export XDG_SESSION_TYPE=wayland
-    export XDG_SESSION_DESKTOP=KDE
-    export GDK_DISABLE_SANDBOXED_LOADER=1
-    SESSION="kde"
-    [ -f /etc/hiroki/selected-de ] && SESSION=$(cat /etc/hiroki/selected-de | tr -d '[:space:]')
-    case "$SESSION" in
-        kde|plasma)  exec startplasma-wayland ;;
-        lxqt)        exec startlxqt ;;
-        *)           exec startplasma-wayland ;;
-    esac
-fi
-BPROFILE
-chmod 644 /home/live/.bash_profile
-chown 1000:1000 /home/live/.bash_profile 2>/dev/null || true
+mkdir -p /etc/hiroki
+echo "neox" > /etc/hiroki/selected-de 2>/dev/null || true
 
 # --- Hiroki OS Branding: tum Arch yazilarini Hiroki yap ---
 # os-release
@@ -170,19 +151,11 @@ if [ -f /boot/vmlinuz-linux ]; then
   echo "GRUB kuruldu"
 fi
 
-# KDE plasmoidleri ve ayarlari kur
-echo "KDE ozellestirmeleri kuruluyor..."
-mkdir -p /etc/skel/.local/share/plasma/plasmoids
-cp -r /usr/share/plasma/plasmoids/luisbocanegra.panel.colorizer /etc/skel/.local/share/plasma/plasmoids/ 2>/dev/null || true
-cp -r /usr/share/plasma/plasmoids/org.kde.latte.spacer /etc/skel/.local/share/plasma/plasmoids/ 2>/dev/null || true
-# KDE config dosyalari skel'e kopyalandi (airootfs'ten gelir)
-echo "KDE ozellestirmeleri tamamlandi"
-
 # prison paketi Docker'da hook hatasi veriyor - IgnorePkg'a ekle
 sed -i '/\[options\]/a IgnorePkg = prison' /etc/pacman.conf 2>/dev/null || true
 
-# --- NEOX masaustu (Hyprland tabanli) kurulumu ---
-# Live ISO'da da secilebilir olmasi icin scripts/install.sh ile /usr altina kurulur.
+# --- NEOX masaustu (Hyprland tabanli, tek masaustu) kurulumu ---
+# Canli ISO'da da NEOX'un hazir olmasi icin scripts/install.sh ile /usr altina kurulur.
 if [ -x /usr/share/neox-desktop/scripts/install.sh ]; then
   echo "NEOX masaustu kuruluyor..."
   PREFIX=/usr DESTDIR="" bash /usr/share/neox-desktop/scripts/install.sh 2>&1 || \

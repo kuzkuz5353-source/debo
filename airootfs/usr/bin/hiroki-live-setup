@@ -25,11 +25,11 @@ systemctl start bluetooth 2>/dev/null || true
 # Ses (kullanıcı servisleri)
 systemctl --user start pipewire.service pipewire-pulse.service wireplumber.service 2>/dev/null || true
 
-# Live kullanıcısı için otomatik welcome (gecikmeli)
+# Live kullanıcısı için otomatik welcome (gecikmeli, NEOX/Wayland oturumu içinde)
 if id "$LIVE_USER" >/dev/null 2>&1; then
     (
         sleep 3
-        DISPLAY=:0 sudo -u "$LIVE_USER" hiroki-welcome 2>/dev/null || true
+        XDG_RUNTIME_DIR="/run/user/$(id -u "$LIVE_USER")" sudo -u "$LIVE_USER" hiroki-welcome 2>/dev/null || true
     ) &
 fi
 

@@ -1,6 +1,8 @@
 # 🗂️ Hiroki OS Dosya Haritası — Tam Dizin Yapısı
 
-Bu belge projenin **gerçek, çalışır** tüm dosyalarını listeler. Her dosya kopyala-yapıştır kullanıma hazırdır.
+Bu belge projenin **gerçek, çalışır** tüm dosyalarını listeler. Hiroki OS artık tek
+masaüstü sunar: **NEOX** (Hyprland tabanlı, Wayland). KDE Plasma, LXQt, XFCE, GNOME,
+Cinnamon, MATE, Budgie, i3wm, Openbox ve Calamares kaldırılmıştır.
 
 ```
 hiroki-os/
@@ -23,76 +25,67 @@ hiroki-os/
 ├── syslinux/syslinux.cfg
 ├── grub/grub.cfg
 │
+├── neox-desktop/                        # NEOX masaüstü kaynak kodu (Hyprland tabanlı)
+│   ├── compositor/hyprland.conf
+│   ├── config/{neox.conf,keybindings.conf,autostart.conf,gestures.conf}
+│   ├── shell/*.py                       # panel, arama, görev değiştirici, kontrol merkezi...
+│   ├── widgets/*.py                     # saat, hava durumu, sistem izleme, medya oynatıcı
+│   ├── themes/*.css + theme-engine.py
+│   ├── dbus/neox-dbus-service.py
+│   ├── systemd/{neox-shell.service,neox-compositor.service}
+│   ├── session/{neox.desktop,neox-session.session}
+│   ├── scripts/{install.sh,uninstall.sh,neox-session.sh,neox-autostart.sh}
+│   └── packaging/{arch,deb,rpm}/
+│
 └── airootfs/
     ├── etc/
     │   ├── hostname                     # hiroki
     │   ├── locale.conf                  # LANG=tr_TR.UTF-8
-    │   ├── locale.gen                   # tr,en,ja,de,fr...
+    │   ├── locale.gen
     │   ├── vconsole.conf                # KEYMAP=trq
     │   ├── os-release                   # Hiroki OS 1.0 Neox
     │   ├── lsb-release
     │   ├── pacman.d/mirrorlist
     │   ├── sudoers.d/10-hiroki-live
-    │   ├── lightdm/lightdm.conf
-    │   ├── lightdm/lightdm-gtk-greeter.conf
     │   ├── skel/
     │   │   ├── .bashrc                  # Hiroki prompt + fastfetch
     │   │   ├── Pictures/wallpaper.jpg   # neox-gradient
     │   │   └── .config/
     │   │       ├── autostart/hiroki-welcome.desktop
     │   │       ├── gtk-3.0/{settings.ini,gtk.css}
-    │   │       ├── xfce4/...            # XFCE panel/xsettings
-    │   │       ├── conky/hiroki-conky.conf
+    │   │       ├── hypr/hyprpaper.conf  # Hyprland/NEOX varsayılan yapılandırması
+    │   │       ├── rofi/config.rasi     # Uygulama başlatıcı
     │   │       ├── waybar/{config,style.css}
     │   │       ├── wofi/hiroki.css
-    │   │       ├── hypr/hyprpaper.conf
     │   │       ├── mako/config
     │   │       ├── picom/picom.conf
     │   │       ├── dunst/dunstrc
+    │   │       ├── mimeapps.list
     │   │       └── fastfetch/config.jsonc
     │   ├── hiroki/
-    │   │   ├── branding/
-    │   │   ├── de-selector/recommendations.json
-    │   │   └── post-install/
-    │   │       ├── hiroki-post-install.sh
-    │   │       ├── apply-theme.sh
-    │   │       ├── enable-services.sh
-    │   │       └── setup-displaymanager.sh
-    │   ├── calamares/
-    │   │   ├── settings.conf            # show/exec sırası (hiroki-de-select dahil)
-    │   │   ├── branding/hiroki/
-    │   │   │   ├── branding.desc        # 900x600, Hiroki renkleri
-    │   │   │   ├── show.qml             # 5 slayt
-    │   │   │   ├── hiroki-logo.png
-    │   │   │   ├── hiroki-icon.png
-    │   │   │   ├── hiroki-welcome.png
-    │   │   │   └── slide1..5.png
-    │   │   └── modules/
-    │   │       ├── welcome.conf         # 15GB, 512MB, internet check
-    │   │       ├── locale.conf
-    │   │       ├── keyboard.conf
-    │   │       ├── partition.conf       # Btrfs @, @home, @snapshots, swap choices
-    │   │       ├── users.conf           # /bin/bash, wheel vb.
-    │   │       ├── displaymanager.conf  # lightdm/sddm/gdm/ly
-    │   │       ├── packagechooser_hiroki.conf # 10 DE, paket listeleri
-    │   │       ├── netinstall.conf      # Ek yazılım grupları
-    │   │       ├── packages.conf
-    │   │       ├── shell.conf           # post-install 4 script
-    │   │       ├── fstab.conf
-    │   │       ├── bootloader.conf      # GRUB
-    │   │       ├── services-systemd.conf
-    │   │       └── finished.conf
+    │   │   ├── hiroki-dm.conf           # hiroki-dm görüntü yöneticisi yapılandırması
+    │   │   ├── selected-de              # "neox" (tek değer)
+    │   │   └── snapshot-settings.json
     │   └── systemd/system/
+    │       ├── hiroki-dm.service        # NEOX/Wayland görüntü yöneticisi (getty@tty1 yerine)
     │       ├── hiroki-live.service
-    │       └── display-manager.service.d/
+    │       ├── hiroki-boot-snapshot.{service,timer}
+    │       └── hiroki-hello-update.{service,timer}
     ├── usr/
     │   ├── bin/
-    │   │   ├── hiroki-hw-detect         # Bash - donanım algılama
-    │   │   ├── hiroki-de-selector       # Wrapper → Python GTK
+    │   │   ├── hiroki-hw-detect         # Bash - donanım algılama (NEOX min. gereksinim kontrolü)
+    │   │   ├── hiroki-dm                # Bash - NEOX/Wayland görüntü yöneticisi (root)
+    │   │   ├── hiroki-dm-session        # Bash - kullanıcı oturumu başlatıcı (neox-session çağırır)
+    │   │   ├── hiroki-dm-wrapper        # Bash - D-Bus/XDG_RUNTIME_DIR hazırlayıp hiroki-dm'i çağırır
+    │   │   ├── hiroki-installer         # PyQt6 - Hiroki'nin kendi grafik kurulum sihirbazı
+    │   │   ├── hiroki-installer-launch  # Bash - sudo ile hiroki-installer'ı başlatır
     │   │   ├── hiroki-welcome           # Wrapper → Python GTK
-    │   │   ├── hiroki-theme-manager     # Python GTK
+    │   │   ├── hiroki-theme-manager     # Python GTK - tema/vurgu/duvar kağıdı
+    │   │   ├── hiroki-wallpaper         # PyQt6 - duvar kağıdı seçici (hyprpaper IPC)
+    │   │   ├── hiroki-tweaks            # Python - sistem ince ayarları
+    │   │   ├── hiroki-neofetch          # Python - sistem bilgisi (NEOX/Hyprland farkında)
     │   │   ├── hiroki-update            # Python GTK + VTE
-    │   │   ├── hiroki-btrfs-assistant          # PyQt6 - otomatik snapshot + GRUB restore
+    │   │   ├── hiroki-btrfs-assistant   # PyQt6 - otomatik snapshot + GRUB restore
     │   │   ├── hiroki-driver-manager    # Python GTK
     │   │   ├── hiroki-network-manager   # PyQt6 - tek tıkla DNS + izole ağ
     │   │   ├── hiroki-kernel-manager    # PyQt6 - oyun çekirdeği yöneticisi
@@ -100,39 +93,34 @@ hiroki-os/
     │   │   └── hiroki-live-setup        # Bash - live hazırlık
     │   ├── share/
     │   │   ├── hiroki/
-    │   │   │   ├── de-selector/hiroki-de-selector.py  # Ana GUI (10 DE grid)
-    │   │   │   └── wallpapers/5x.jpg + hiroki-logo.png
+    │   │   │   └── wallpapers/5x.jpg + hiroki-neox-logo.png
     │   │   ├── hiroki-welcome/hiroki-welcome.py       # Hoş geldiniz (live/ilk boot)
-    │   │   ├── themes/Hiroki-Dark/{gtk-3.0/gtk.css,gtk-2.0/gtkrc,index.theme}
+    │   │   ├── themes/Hiroki-Dark/{gtk-3.0/gtk.css,gtk-4.0/gtk.css,index.theme}
     │   │   ├── icons/Hiroki-Icons/index.theme
-    │   │   ├── wallpapers/ (symlink kopya)
+    │   │   ├── backgrounds/neox/ (5 duvar kağıdı)
     │   │   ├── grub/themes/hiroki/theme.txt + background.png
-    │   │   ├── sddm/themes/hiroki/{theme.conf,Main.qml}
     │   │   ├── plymouth/themes/hiroki/{hiroki.plymouth,hiroki.script}
     │   │   ├── hiroki/neofetch/config.conf
-    │   │   ├── hiroki/ascii/hiroki.txt
-    │   │   ├── neox-desktop/                          # NEOX kaynak paketi (bkz. neox-desktop/ ve NEOX bölümü)
-    │   │   │   ├── scripts/install.sh                 # Hedef sisteme kurar (hiroki-installer + apply-theme.sh çağırır)
+    │   │   ├── neox-desktop/                          # NEOX kaynak paketinin canlı ortam kopyası
+    │   │   │   ├── scripts/install.sh                 # Hedef sisteme kurar (hiroki-installer çağırır)
     │   │   │   ├── compositor/hyprland.conf
     │   │   │   ├── shell/*.py, widgets/*.py, themes/*.css
     │   │   │   └── session/{neox.desktop,neox-session.session}
-    │   │   └── applications/hiroki-welcome.desktop
-    │   └── lib/calamares/modules/ (Calamares yerel modüller)
-    └── root/ (boş, archiso tarafından kullanılır)
+    │   │   └── applications/hiroki-*.desktop
+    │   └── lib/systemd/user/ (neox-shell.service, neox-compositor.service kurulum sırasında eklenir)
+    └── root/customize_airootfs.sh (archiso hook: live kullanıcı, NEOX/hiroki-dm kurulumu)
 ```
 
 ### Kritik Dosya Amaçları
 
 | Dosya | Amaç |
 |---|---|
-| `hiroki-hw-detect` | RAM/CPU/GPU/disk/virt algılar → `recommendations.json` mantığı → `/tmp/hiroki-hw-info.json` |
-| `hiroki-de-selector.py` | GTK grid, sol donanım, sağ 10 DE, uyarı dialogu, `/tmp/hiroki-selected-de` yazar |
-| `hiroki-welcome.py` | Live: DE Seç + Kurulum; Kurulu: Güncelle + Tema |
-| `packagechooser_hiroki.conf` | Calamares instance `hiroki-de-select` → 10 DE paket listeleri |
-| `apply-theme.sh` | Seçilen DE'ye göre Hiroki temayı `/etc/skel` ve kullanıcıya uygular; `neox` seçiliyse `neox-desktop/scripts/install.sh`'ı çağırır |
-| `setup-displaymanager.sh` | DE → DM eşleşmesi (KDE→sddm, GNOME→gdm, neox→hiroki-dm, diğer→lightdm) |
-| `neox-desktop/scripts/install.sh` | NEOX'u `/usr`, `~/.config/hypr`, `~/.config/neox` altına kurar; `hiroki-installer` ve `apply-theme.sh` tarafından çağrılır |
+| `hiroki-hw-detect` | RAM/CPU/GPU/disk/virt algılar, NEOX'un 4 GB önerisiyle karşılaştırır → `/tmp/hiroki-hw-info.json` |
+| `hiroki-dm` + `hiroki-dm-wrapper` + `hiroki-dm-session` | Hiroki'nin kendi Wayland görüntü yöneticisi; tty1'de systemd servisi olarak çalışır, `neox-session`'ı başlatır |
+| `hiroki-installer` | PyQt6 tabanlı kurulum sihirbazı: disk seçimi, kullanıcı, dil/klavye/saat dilimi, Btrfs/ext4, NEOX kurulumu, GRUB |
+| `hiroki-welcome.py` | Live: Hiroki Installer'ı başlat; Kurulu: Güncelle + Tema + araçlar |
+| `neox-desktop/scripts/install.sh` | NEOX'u `/usr`, `~/.config/hypr`, `~/.config/neox` altına kurar; `hiroki-installer` tarafından çağrılır |
 | `profiledef.sh` | `HIROKI_OS` etiketi, `hiroki-os` ismi, file_permissions executable |
-| `build.sh` | 17 adımlı ISO derleme, checksum, QEMU talimatı |
+| `build.sh` | ISO derleme, checksum, QEMU talimatı |
 
-Tüm dosyalar POSIX/Bash/Python3/GTK3/Systemd/Calamares resmi dokümantasyonuyla uyumludur.
+Tüm dosyalar POSIX/Bash/Python3/GTK3/Systemd resmi dokümantasyonuyla uyumludur.

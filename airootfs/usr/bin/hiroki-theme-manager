@@ -121,11 +121,17 @@ class HirokiThemeManager(Gtk.Window):
         text = combo.get_active_text()
         if not text: return
         theme = text.split(" —")[0]
+        icon_theme = THEMES.get(theme, {}).get("icon", "Hiroki-Icons")
+        # GTK ayarlarını doğrudan settings.ini üzerinden uygula (NEOX/Wayland).
+        gtk_settings = os.path.expanduser("~/.config/gtk-3.0/settings.ini")
+        os.makedirs(os.path.dirname(gtk_settings), exist_ok=True)
+        try:
+            with open(gtk_settings, "w") as f:
+                f.write(f"[Settings]\ngtk-theme-name={theme}\ngtk-icon-theme-name={icon_theme}\n")
+        except OSError:
+            pass
         set_gsetting("org.gnome.desktop.interface", "gtk-theme", theme)
-        set_gsetting("org.gnome.desktop.interface", "icon-theme", THEMES.get(theme, {}).get("icon", "Hiroki-Icons"))
-        # XFCE
-        subprocess.run(["xfconf-query","-c","xsettings","-p","/Net/ThemeName","-s",theme], check=False)
-        subprocess.run(["xfconf-query","-c","xsettings","-p","/Net/IconThemeName","-s",THEMES.get(theme, {}).get("icon","Hiroki-Icons")], check=False)
+        set_gsetting("org.gnome.desktop.interface", "icon-theme", icon_theme)
 
     def on_accent_changed(self, combo):
         label = combo.get_active_text()
@@ -138,12 +144,9 @@ class HirokiThemeManager(Gtk.Window):
 
     def on_wallpaper(self, btn, fid):
         path = f"{WALLPAPER_DIR}/{fid}.jpg"
-        # XFCE
-        subprocess.run(["xfconf-query","-c","xfce4-desktop","-p","/backdrop/screen0/monitor0/workspace0/last-image","-s",path], check=False)
-        # GNOME
-        set_gsetting("org.gnome.desktop.background", "picture-uri", f"file://{path}")
-        # feh fallback
-        subprocess.run(["feh","--bg-scale",path], check=False)
+        # NEOX/Hyprland: hyprpaper IPC ile duvar kağıdını uygula.
+        subprocess.run(["hyprctl", "hyprpaper", "preload", path], check=False)
+        subprocess.run(["hyprctl", "hyprpaper", "wallpaper", f",{path}"], check=False)
         dialog = Gtk.MessageDialog(transient_for=self, flags=0, message_type=Gtk.MessageType.INFO, buttons=Gtk.ButtonsType.OK, text="Duvar kağıdı uygulandı")
         dialog.format_secondary_text(path)
         dialog.run(); dialog.destroy()

@@ -29,7 +29,7 @@ sudo pacman -Syu --needed \
   make \
   python \
   python-gobject \
-  python-pyqt5  # Calamares bağımlılıkları için gerekebilir
+  python-pyqt6  # hiroki-installer bağımlılıkları için gerekebilir
 ```
 
 Kontrol:
@@ -56,7 +56,8 @@ ls -l  # profiledef.sh, packages.x86_64, build.sh, airootfs/ görünmeli
 
 ```bash
 cat packages.x86_64
-# Kategoriler: Temel Sistem, Dosya Sistemi, Xorg/Wayland, GPU, Yazı Tipleri, Calamares, XFCE Live, Ortak Uygulamalar
+# Kategoriler: Temel Sistem, Dosya Sistemi, Wayland/XWayland, GPU, Yazı Tipleri,
+# Hiroki Installer, Ortak Masaüstü Uygulamaları, Ses/Multimedya, NEOX Masaüstü
 ```
 
 İsteğe bağlı: `pacman.conf` içinde `multilib` zaten açıktır; Hiroki deposu yorum satırındadır.
@@ -70,7 +71,7 @@ cat packages.x86_64
 sudo ./build.sh
 ```
 
-`build.sh` şu 17 adımı sırayla yapar:
+`build.sh` sırasıyla şu adımları yapar:
 
 1. Bağımlılık kontrolü (`archiso`, `squashfs-tools` vb.)
 2. Çalışma dizini oluştur (`/tmp/hiroki-build-work`)
@@ -79,16 +80,15 @@ sudo ./build.sh
 5. Paket listesini oku ve doğrula
 6. `pacman.conf` yapılandır (multilib)
 7. `airootfs` dosya sistemini oluştur
-8. Calamares yapılandırmasını yerleştir
-9. Hiroki tema dosyalarını yerleştir
-10. Hoş geldiniz uygulamasını yerleştir
-11. Özel araçları yerleştir
-12. systemd servislerini yapılandır (live)
-13. Live kullanıcısını yapılandır (otomatik giriş, varsayılan XFCE)
-14. squashfs sıkıştırması yap (`xz -Xbcj x86`)
-15. ISO oluştur
-16. SHA256 ve MD5 checksum oluştur
-17. Çıktı: `out/hiroki-os-1.0-x86_64.iso`
+8. Hiroki tema dosyalarını yerleştir
+9. Hoş geldiniz uygulamasını yerleştir
+10. Özel araçları yerleştir (hiroki-installer dahil)
+11. systemd servislerini yapılandır (live, hiroki-dm)
+12. Live kullanıcısını yapılandır (otomatik giriş, NEOX/hiroki-dm)
+13. squashfs sıkıştırması yap
+14. ISO oluştur
+15. SHA256 ve MD5 checksum oluştur
+16. Çıktı: `out/hiroki-os-1.0-x86_64.iso`
 
 ### Manuel (Archiso doğrudan)
 ```bash
@@ -121,15 +121,15 @@ ls -lh out/
 
 ### QEMU (hızlı)
 ```bash
-qemu-system-x86_64 -enable-kvm -m 2048 -cdrom out/hiroki-os-*.iso -boot d
-# 512 MB testi: -m 512
+qemu-system-x86_64 -enable-kvm -m 4096 -cdrom out/hiroki-os-*.iso -boot d
+# Düşük RAM testi: -m 2048
 # UEFI testi: -bios /usr/share/edk2-ovmf/x64/OVMF.fd
 ```
 
 ### VirtualBox / VMware
 
-- Yeni VM → Linux → Arch 64-bit → 2048 MB RAM, 20 GB disk, EFI etkin
-- ISO'yu bağla → Başlat → **Hiroki OS'u Dene** → Calamares ile kur
+- Yeni VM → Linux → Arch 64-bit → 4096 MB RAM, 20 GB disk, EFI etkin
+- ISO'yu bağla → Başlat → **Hiroki OS'u Dene** → Hiroki Installer ile kur
 
 ### Gerçek Donanım
 
@@ -149,7 +149,7 @@ sudo dd if=out/hiroki-os-*.iso of=/dev/sdX bs=4M status=progress oflag=sync
 | `failed to install packages` | `sudo pacman -Syu` yap, mirror yenile: `reflector --latest 5 --sort rate --save /etc/pacman.d/mirrorlist` |
 | `no space left` | `/tmp` en az 15 GB boş olmalı; `WORK_DIR` başka diske al: `sudo mkdir -p /mnt/big/work && sudo ./build.sh` içinde `WORK_DIR` değiştir |
 | `permission denied` | `sudo` ile çalıştır, `chmod +x build.sh` |
-| Calamares başlamıyor | `airootfs/etc/calamares/settings.conf` ve `branding.desc` JSON/YAML sözdizimi kontrol et: `python -c "import yaml; yaml.safe_load(open('airootfs/etc/calamares/settings.conf'))"` |
+| Hiroki Installer başlamıyor | `sudo python3 /usr/bin/hiroki-installer --check` ile bağımsız kontrol çalıştır; PyQt6 kurulu mu doğrula |
 | ISO boot etmiyor (UEFI) | `profiledef.sh` içinde `bootmodes` UEFI içermeli; `edk2-ovmf` kurulu mu kontrol et |
 | Paket bulunamadı | Paket ismi güncel mi kontrol et: `pacman -Ss <isim>`; AUR paketleri `packages.x86_64` içine eklenmemeli (yay/paru ile kurulur) |
 
@@ -171,7 +171,7 @@ sudo ./build.sh
   sudo unsquashfs -f -d /tmp/airootfs-test /mnt/arch/x86_64/airootfs.sfs
   sudo arch-chroot /tmp/airootfs-test /usr/bin/hiroki-hw-detect
   ```
-- **Calamares modülü:** `packagechooser_hiroki.conf` içindeki paket listeleri `pacman -Si` ile doğrulanabilir.
+- **hiroki-installer paket listesi:** `DES["neox"]["packages"]` içindeki paketler `pacman -Si` ile doğrulanabilir.
 - **Tema:** GTK değişiklikleri için `GTK_DEBUG=interactive gtk3-widget-factory` ile canlı test.
 
 ---
@@ -180,7 +180,7 @@ sudo ./build.sh
 
 - `profiledef.sh` → `iso_version`
 - `airootfs/etc/os-release` → `VERSION`
-- `airootfs/etc/calamares/branding/hiroki/branding.desc` → `version`
+- `airootfs/usr/bin/hiroki-installer` → `VERSION`
 - `README.md` ve `BUILDING.md` güncelle
 - `git tag v1.0 && git push origin v1.0`
 

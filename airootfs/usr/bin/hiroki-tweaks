@@ -71,14 +71,6 @@ def write_sysctl(key, val):
     run_sudo(f"grep -q '^{key}' /etc/sysctl.d/99-hiroki.conf 2>/dev/null && sed -i 's|^{key}.*|{key} = {val}|' /etc/sysctl.d/99-hiroki.conf || echo '{key} = {val}' | sudo tee -a /etc/sysctl.d/99-hiroki.conf > /dev/null")
 
 
-def kde_write(group, key, value, kde5=True, kde6=True):
-    if kde5 and shutil.which("kwriteconfig5"):
-        run_cmd(f"kwriteconfig5 --file plasmarc --group Theme --key name '{value}'")
-        run_cmd(f"kwriteconfig5 --group '{group}' --key '{key}' '{value}'")
-    if kde6 and shutil.which("kwriteconfig6"):
-        run_cmd(f"kwriteconfig6 --group '{group}' --key '{key}' '{value}'")
-
-
 def systemctl_is_active(service):
     return run_cmd(f"systemctl is-active {service}") == "active"
 

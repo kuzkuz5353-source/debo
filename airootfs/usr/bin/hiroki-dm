@@ -1,20 +1,16 @@
 #!/usr/bin/env bash
 # Hiroki OS - Display Manager (Wayland)
-# Root olarak çalışır, live kullanıcısı olarak Wayland session başlatır.
+# Root olarak çalışır, live/kurulu kullanıcı olarak NEOX (Hyprland) oturumunu başlatır.
+# Hiroki OS artık tek masaüstü sunar: NEOX. Diğer tüm masaüstü seçenekleri kaldırılmıştır.
 set -euo pipefail
 
-SESSION="kde"
-[[ -r /etc/hiroki/selected-de ]] && SESSION=$(tr -d '[:space:]' < /etc/hiroki/selected-de)
+CMD="neox-session"
 
-case "$SESSION" in
-    kde|plasma)  CMD="startplasma-wayland" ;;
-    lxqt)        CMD="startlxqt" ;;
-    neox)        CMD="neox-session" ;;
-    *)           CMD="startplasma-wayland" ;;
-esac
+# Yapılandırmayı oku (varsa)
+[[ -r /etc/hiroki/hiroki-dm.conf ]] && source /etc/hiroki/hiroki-dm.conf
 
 # Oturum kullanıcısı
-USER_NAME="live"
+USER_NAME="${HIROKI_DM_USER:-live}"
 UID_NUM=$(id -u "$USER_NAME" 2>/dev/null || echo 1000)
 
 # XDG_RUNTIME_DIR
@@ -24,7 +20,7 @@ chmod 700 "$XDG_RUNTIME_DIR"
 
 # Wayland session baslat
 export XDG_SESSION_TYPE=wayland
-export XDG_SESSION_DESKTOP=KDE
+export XDG_SESSION_DESKTOP=NEOX
 export GDK_DISABLE_SANDBOXED_LOADER=1
 
 echo "[hiroki-dm] Starting $CMD for $USER_NAME"
@@ -33,7 +29,7 @@ echo "[hiroki-dm] Starting $CMD for $USER_NAME"
 su - "$USER_NAME" -c "
     export XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR
     export XDG_SESSION_TYPE=wayland
-    export XDG_SESSION_DESKTOP=KDE
+    export XDG_SESSION_DESKTOP=NEOX
     export GDK_DISABLE_SANDBOXED_LOADER=1
     systemctl --user start pipewire.service pipewire-pulse.service wireplumber.service 2>/dev/null || true
     exec dbus-run-session -- $CMD
