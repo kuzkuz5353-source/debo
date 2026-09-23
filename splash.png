@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="192mm"
+   height="108mm"
+   viewBox="0 0 192 108"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.4 (dcaf3e7d9e, 2026-05-05)"
+   sodipodi:docname="splashpng"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#999999"
+     borderopacity="1"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="0.9888468"
+     inkscape:cx="323.10364"
+     inkscape:cy="170.40051"
+     inkscape:window-width="1368"
+     inkscape:window-height="800"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Katman 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:#000000;stroke-width:0.264583"
+       id="rect1"
+       width="222.61621"
+       height="117.72973"
+       x="-10.435136"
+       y="-4.5486493"
+       ry="7.0410361" />
+    <path
+       sodipodi:type="star"
+       style="fill:#800080;stroke-width:0.264583"
+       id="path1"
+       inkscape:flatsided="false"
+       sodipodi:sides="5"
+       sodipodi:cx="66.089188"
+       sodipodi:cy="39.599998"
+       sodipodi:r1="41.590191"
+       sodipodi:r2="21.086725"
+       sodipodi:arg1="0.69885687"
+       sodipodi:arg2="-2.9157598"
+       inkscape:rounded="0"
+       inkscape:randomized="0"
+       d="M 97.929727,66.356755 45.537897,34.878298 50.481268,78.150444 64.229094,18.595474 24.602423,36.668728 85.490876,31.340189 56.056876,-0.76207173 79.940185,55.49968 101.37564,17.586138 55.247886,57.686351 Z"
+       transform="translate(-24.616217,31.84054)" />
+    <rect
+       style="fill:#000000;stroke-width:0.264583"
+       id="rect2"
+       width="11.505405"
+       height="1.0702703"
+       x="143.14864"
+       y="45.486488"
+       ry="0.53513515" />
+  </g>
+</svg>
